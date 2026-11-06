@@ -1,9 +1,9 @@
 /* MindGrid service worker: pre-cache everything, serve cache-first, refresh in background. */
-const CACHE = 'mindgrid-v1.0.0';
+const CACHE = 'mindgrid-v1.1.0';
 const FILES = [
   './', 'index.html', 'play.html', 'journey.html', 'archive.html', 'stats.html', 'settings.html', 'howto.html',
   'manifest.webmanifest', 'assets/icon.svg', 'css/style.css', 'js/core.js',
-  'js/puzzles/blocks.js', 'js/puzzles/pipes.js', 'js/puzzles/link.js', 'js/puzzles/crowns.js', 'js/puzzles/lights.js',
+  'js/puzzles/blocks.js', 'js/puzzles/pipes.js', 'js/puzzles/link.js', 'js/puzzles/crowns.js', 'js/puzzles/lights.js', 'js/puzzles/balance.js',
   'js/pages/home.js', 'js/pages/play.js', 'js/pages/journey.js', 'js/pages/archive.js', 'js/pages/stats.js',
   'js/pages/settings.js', 'js/pages/howto.js'
 ];

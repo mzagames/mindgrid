@@ -7,7 +7,7 @@
 
   app.innerHTML = `
     <header class="topbar"><div class="brand">${MG.LOGO}Journey</div><span class="chip">${MG.icon('trophy')}${lvl - 1} cleared</span></header>
-    <p class="muted" style="margin:0">An endless path through all five puzzles. Difficulty rises as you go.</p>
+    <p class="muted" style="margin:0">An endless path through all six puzzles. Difficulty rises as you go.</p>
     <a class="btn" style="margin:16px 0 4px" href="play.html?mode=journey&level=${lvl}">${MG.icon('play')} Play level ${lvl}</a>
     <div class="map" id="map"></div>`;
   const map = document.getElementById('map');

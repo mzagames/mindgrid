@@ -1,4 +1,4 @@
-/* Today page: the five daily puzzles for a date (default today). */
+/* Today page: the six daily puzzles for a date (default today). */
 (function () {
   'use strict';
   const MG = window.MG, app = document.getElementById('app'), q = new URLSearchParams(location.search), today = MG.today();
@@ -26,11 +26,12 @@
       </header>
       ${isToday ? '<div class="eyebrow">Daily puzzles</div>' : '<a class="eyebrow" href="archive.html">‹ Back to archive</a>'}
       <h1>${MG.prettyDate(day)}</h1>
-      <p class="muted" style="margin:0 0 16px">${isToday ? 'Five fresh puzzles, the same for everyone today.' : 'Replaying a past day. It won’t change your streak.'}</p>
+      <p class="muted" style="margin:0 0 16px">${isToday ? 'Six fresh puzzles, the same for everyone today.' : 'Replaying a past day. It won’t change your streak.'}</p>
       <div class="seg" role="group" aria-label="Difficulty">
         ${MG.DIFFS.map((d) => `<button type="button" data-d="${d}" class="${d === diff ? 'on' : ''}" aria-pressed="${d === diff}">${MG.DIFF_LABEL[d]}</button>`).join('')}
       </div>
-      <div class="progress"><div class="bar"><i style="width:${(solved / MG.ORDER.length) * 100}%"></i></div>${solved} / ${MG.ORDER.length} solved</div>
+      <div class="progress"><div class="bar"><i style="width:${(solved / MG.ORDER.length) * 100}%"></i></div>${solved} / ${MG.ORDER.length} solved
+        ${solved ? `<button type="button" class="chip sharebtn" id="share">${MG.icon('share')}Share</button>` : ''}</div>
       ${cards}
       <h2>Keep going</h2>
       <a class="card hero" href="play.html?mode=journey&level=${jl}">
@@ -39,8 +40,10 @@
       </a>
       <a class="card" href="howto.html" style="--pc:var(--accent)">
         <div class="pic">${MG.icon('help')}</div>
-        <div class="body"><div class="title">How to play</div><div class="sub">Rules and controls for all five puzzles</div></div>
+        <div class="body"><div class="title">How to play</div><div class="sub">Rules and controls for all six puzzles</div></div>
       </a>`;
+    const sb = document.getElementById('share');
+    if (sb) sb.addEventListener('click', () => MG.shareDay(day, diff));
     app.querySelectorAll('.seg button').forEach((b) => {
       b.addEventListener('click', () => { MG.setSetting('dailyDiff', b.dataset.d); render(); });
     });

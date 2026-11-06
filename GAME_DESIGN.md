@@ -44,6 +44,7 @@ Every puzzle is **procedurally generated** from a seed, so we never ship level f
 | `link` | **Link** | Draw one path from 1 that visits every cell once and passes the numbers in order. | Random Hamiltonian path (serpentine plus "backbite" moves), with checkpoints spread along it. | Path covers all cells, starts at 1, ends at the last number, and numbers appear in order. |
 | `crowns` | **Crowns** | Place one crown in each row, column and colour region. Crowns may not touch, even diagonally. | Random non-touching permutation, then regions grown from each crown. A solver retries until the solution is **unique**. | N crowns and zero conflicts. |
 | `lights` | **Glow** | Tapping a cell flips it and its 4 neighbours. Turn every light off. | Random presses applied to an empty board, so it is always solvable. | All cells off. |
+| `balance` | **Balance** *(v1.1)* | Fill every cell with a sun or a moon. Each row and column is half and half, with never three alike in a line. | Random full grid from a propagate-and-backtrack solver, then clues removed one by one while the solution stays **unique**. | Grid full, balanced and no triples. |
 
 ### Difficulty table
 
@@ -54,6 +55,7 @@ Every puzzle is **procedurally generated** from a seed, so we never ship level f
 | Link (size / numbers) | 5×5 / 8 | 6×6 / 9 | 7×7 / 10 | 8×8 / 11 |
 | Crowns (size) | 5×5 | 6×6 | 8×8 | 9×9 |
 | Glow (size / presses) | 3×3 / 3 | 4×4 / 5 | 5×5 / 8 | 6×6 / 12 |
+| Balance (size / clues kept) | 6×6 / ~50% | 8×8 / ~40% | 10×10 / ~34% | 10×10 / minimal |
 
 ### Controls
 
@@ -64,6 +66,7 @@ Every puzzle is **procedurally generated** from a seed, so we never ship level f
 | Link | Press on **1** and drag. Drag backwards (or press an earlier cell) to backtrack. |
 | Crowns | Tap to cycle empty → ✕ → crown. Drag over empty cells to paint ✕ marks. |
 | Glow | Tap a cell. |
+| Balance | Tap to cycle sun → moon → empty. Right-click cycles backwards. Shaded cells are fixed. |
 
 All puzzles support **Undo**, **Reset** and **Hint**:
 - Blocks: places one correct rectangle.
@@ -71,13 +74,15 @@ All puzzles support **Undo**, **Reset** and **Hint**:
 - Link: extends the correct path to the next number.
 - Crowns: removes a wrong crown, or places a correct one.
 - Glow: highlights a cell to press.
+- Balance: fixes a wrong cell, otherwise fills a cell that logic forces next.
 
 ---
 
 ## 4. Game loops and progression
 
 ### 4.1 Today (daily challenge)
-- The 5 puzzles for each date are generated from `seed = hash("mindgrid|d:<date>:<type>:<difficulty>")`.
+- The 6 puzzles for each date are generated from `seed = hash("mindgrid|d:<date>:<type>:<difficulty>")`.
+- **Share** (v1.1): copies an emoji summary of the day, for example `🟧 Blocks 1:23 · ⬜ Pipes –`, plus the game link. It uses the share sheet on phones and the clipboard on desktop.
 - You choose a difficulty with a segmented control (it is remembered).
 - Solving at least one daily puzzle **on its own date** keeps the 🔥 **streak** alive.
 
@@ -169,12 +174,13 @@ MindGrid/
 6. **PWA:** manifest, icon, service worker.
 7. **Test:** run the generators for many seeds in Node (`tests/generators.test.js`), then play in a browser on desktop and phone widths.
 8. **Ship:** git init and commit, push to GitHub, enable **GitHub Pages** so the game is playable online.
+9. **v1.1:** added the Balance puzzle (binary grid, unique solutions) and the Share result feature.
 
 ---
 
 ## 9. Future ideas
-- More puzzle types: binary grid (equal 0/1 rows), nonogram, sum-sudoku.
-- Share card: "MindGrid · Nov 6 · 5/5 · 6:12" copied to the clipboard.
+- ~~Binary grid puzzle~~ (shipped in v1.1 as **Balance**). Next ideas: nonogram, sum-sudoku.
+- ~~Share card~~ (shipped in v1.1).
 - Weekly themed challenge and achievements.
 - Optional cloud sync (Supabase or Firebase) to keep progress across devices.
 - Native wrappers (Capacitor) for Play Store and App Store builds.

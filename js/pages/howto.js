@@ -14,7 +14,7 @@
     <div class="howto">${cards}</div>
     <h2>Modes</h2>
     <div class="group">
-      <div class="row"><div class="lbl">Today<small>Five new puzzles every day, the same for everyone. Solve one to keep your streak.</small></div></div>
+      <div class="row"><div class="lbl">Today<small>Six new puzzles every day, the same for everyone. Solve one to keep your streak.</small></div></div>
       <div class="row"><div class="lbl">Journey<small>Endless levels cycling through every puzzle, from Easy to Expert.</small></div></div>
       <div class="row"><div class="lbl">Archive<small>Replay any day from the past year for free.</small></div></div>
       <div class="row"><div class="lbl">Tools<small>Undo (Ctrl+Z), Reset and Hint (H). Your progress saves automatically.</small></div></div>

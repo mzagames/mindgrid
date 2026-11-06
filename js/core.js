@@ -2,9 +2,10 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.0.0';
+  MG.VERSION = '1.1.0';
   MG.puzzles = {};
-  MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights'];
+  MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
+  MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
   MG.DIFFS = ['easy', 'medium', 'hard', 'expert'];
   MG.DIFF_LABEL = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert' };
   MG.register = function (p) { MG.puzzles[p.id] = p; };
@@ -211,6 +212,7 @@
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.7.3-1 .9-1 1.7M12 17h.01"/>',
     play: '<path d="M8 5.5v13l10.5-6.5z"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    share: '<path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M5 12v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12"/>',
     trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20.5h7M10 17h4v3.5h-4z"/>'
   };
   MG.icon = function (name, cls) {
@@ -261,6 +263,68 @@
     }
     document.body.appendChild(layer);
     setTimeout(function () { layer.remove(); }, 2400);
+  };
+
+  /* ---------- Sharing ---------- */
+  MG.siteUrl = function () { return new URL('./', location.href).href; };
+  MG.shareText = function (day, diff) {
+    var solved = 0;
+    var lines = MG.ORDER.map(function (t) {
+      var r = MG.getResult(MG.dailyKey(day, t, diff));
+      if (r) solved++;
+      return (r ? MG.EMOJI[t] : '⬜') + ' ' + MG.puzzles[t].name + ' ' +
+        (r ? MG.fmtTime(r.time) + (r.hints ? ' 💡' + r.hints : '') : '–');
+    });
+    return 'MindGrid · ' + MG.prettyDate(day, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' +
+      MG.DIFF_LABEL[diff] + '\n' + solved + '/' + MG.ORDER.length + ' solved\n' + lines.join('\n') + '\n' + MG.siteUrl();
+  };
+  /** Native share sheet when available, otherwise clipboard. Resolves 'shared' | 'copied' | 'cancelled' | 'failed'. */
+  MG.share = function (text) {
+    function legacyCopy() {
+      var ta = MG.h('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      ta.remove();
+      return ok ? 'copied' : 'failed';
+    }
+    function copy() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(function () { return 'copied'; }, legacyCopy);
+      }
+      return Promise.resolve(legacyCopy());
+    }
+    var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    if (navigator.share && touch) {
+      return navigator.share({ text: text }).then(function () { return 'shared'; }, function (e) {
+        return e && e.name === 'AbortError' ? 'cancelled' : copy();
+      });
+    }
+    return copy();
+  };
+  MG.toast = function (msg) {
+    var old = document.querySelector('.toast'); if (old) old.remove();
+    var t = MG.h('div', 'toast', MG.esc(msg));
+    t.setAttribute('role', 'status');
+    document.body.appendChild(t);
+    setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 250); }, 2200);
+  };
+  MG.shareDay = function (day, diff) {
+    var text = MG.shareText(day, diff);
+    return MG.share(text).then(function (res) {
+      if (res === 'copied') MG.toast('Result copied to clipboard');
+      else if (res === 'failed') {
+        var m = MG.modal('<h3>Your result</h3><p class="muted">Copy this and paste it anywhere.</p>' +
+          '<textarea class="sharebox" readonly rows="9">' + MG.esc(text) + '</textarea>' +
+          '<button type="button" class="btn" id="shareDone">Done</button>');
+        var box = m.el.querySelector('textarea');
+        box.focus(); box.select();
+        m.el.querySelector('#shareDone').addEventListener('click', m.close);
+      }
+      return res;
+    });
   };
 
   /* ---------- Offline (service worker) ---------- */

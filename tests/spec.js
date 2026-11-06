@@ -31,12 +31,18 @@
         assert(Object.keys(regions).length === C.n, 'crowns has n regions ' + key);
         if (C.unique) uniq++;
 
+        var Bl = MG.puzzles.balance.generate(MG.rng(key), diff);
+        assert(MG.puzzles.balance._check(Bl, Bl.solution), 'balance solution valid ' + key);
+        assert(Bl.givens.every(function (v, i) { return v === -1 || v === Bl.solution[i]; }), 'balance givens match solution ' + key);
+        assert(Bl.givens.indexOf(-1) >= 0, 'balance has empty cells ' + key);
+        assert(MG.puzzles.balance._count(Bl, Bl.givens) === 1, 'balance unique ' + key);
+
         var G = MG.puzzles.lights.generate(MG.rng(key), diff);
         var st = G.start.slice();
         G.solution.forEach(function (v, i) { if (v) MG.puzzles.lights._press(G.n, st, i); });
         assert(st.every(function (v) { return v === 0; }), 'lights solution clears board ' + key);
       }
-      log(diff + ': ' + SEEDS + ' seeds x 5 puzzles checked in ' + (Date.now() - t0) + 'ms; crowns unique ' + uniq + '/' + SEEDS);
+      log(diff + ': ' + SEEDS + ' seeds x ' + MG.ORDER.length + ' puzzles checked in ' + (Date.now() - t0) + 'ms; crowns unique ' + uniq + '/' + SEEDS);
     });
     log(fails ? fails + ' FAILURES' : 'ALL PASSED', !!fails);
     return fails;

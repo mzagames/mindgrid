@@ -143,7 +143,7 @@
       const nx = nextHref(), st = MG.streak();
       const streakLine = mode === 'daily' && day === today ? `<p class="muted">${MG.icon('flame')} Daily streak: <b>${st.current}</b> day${st.current === 1 ? '' : 's'}</p>` : '';
       const allDone = mode === 'daily' && !nx ? '<p class="muted">You finished every puzzle for this day. See you tomorrow!</p>' : '';
-      MG.modal(`
+      const wm = MG.modal(`
         <div class="pic" style="--pc:${P.color}">${P.icon}</div>
         <div class="eyebrow">${P.name} · ${meta}</div>
         <h3>${praise[Math.floor(Math.random() * praise.length)]}</h3>
@@ -155,7 +155,10 @@
         </div>
         ${streakLine}${allDone}
         ${nx ? `<a class="btn" href="${nx.href}">${nx.label} ${MG.icon('next')}</a>` : ''}
+        ${mode === 'daily' ? `<button type="button" class="btn ghost" id="shareWin">${MG.icon('share')} Share result</button>` : ''}
         <a class="btn ghost" href="${backHref}">${mode === 'journey' ? 'Journey map' : 'Back to puzzles'}</a>`, { dismissable: true });
+      const sw = wm.el.querySelector('#shareWin');
+      if (sw) sw.addEventListener('click', () => MG.shareDay(day, diff));
     }, 800);
   }
 
