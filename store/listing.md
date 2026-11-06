@@ -7,7 +7,8 @@
 | App or game | Game |
 | Category | Puzzle |
 | Free or paid | Free |
-| Contains ads | No |
+| Contains ads | Yes (planned; ad network to be decided) |
+| Contact email | mzagames@proton.me |
 | In-app purchases | None |
 | Default language | English (United States), en-US |
 | Website | https://mzagames.github.io/mindgrid/ |
@@ -17,7 +18,7 @@
 ## Short description (≤80 chars)
 
 ```
-Six calm daily logic puzzles. No ads, no accounts, and it works offline.
+Six calm daily logic puzzles. No account needed, and it works offline.
 ```
 
 ## Full description (≤4000 chars)
@@ -42,7 +43,7 @@ PLAY YOUR WAY
 • Streaks and stats: track your daily streak, best times and progress.
 
 MADE FOR FOCUS
-• No ads. No accounts. No tracking.
+• No account or sign-in needed.
 • Works offline once installed.
 • Unlimited undo, a reset button and gentle hints when you're stuck.
 • Your progress saves automatically.
