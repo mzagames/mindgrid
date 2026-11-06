@@ -1,0 +1,9 @@
+{
+  "appId": "com.mzagaming.mindgrid",
+  "appName": "MindGrid",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#f6f3ec",
+    "allowMixedContent": false
+  }
+}

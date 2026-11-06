@@ -66,7 +66,7 @@ Train your focus, memory and reasoning a few minutes a day. Download MindGrid an
 ## Release notes (v1.2.0)
 
 ```
-First release of MindGrid: six daily logic puzzles, an endless Journey, a free Archive, streaks and stats. No ads, works offline.
+First release of MindGrid: six daily logic puzzles, an endless Journey, a free Archive, streaks and stats. Works offline.
 ```
 
 ## Content rating questionnaire (suggested answers)
@@ -77,14 +77,22 @@ First release of MindGrid: six daily logic puzzles, an endless Journey, a free A
 - Digital purchases: **No**
 - Expected rating: **Everyone / PEGI 3 / IARC 3+**
 
-## Data safety (suggested answers)
-- Does the app collect or share any of the required user data types? **No**
-- (All progress is stored only on the device in local storage. Nothing is sent to a server.)
-- Is data encrypted in transit? N/A, no data is transmitted (files are loaded over HTTPS).
-- Can users request deletion? Users can erase everything in Settings → Reset progress, or by uninstalling.
+## Data safety (suggested answers, Google AdMob SDK)
+- Does the app collect or share any of the required user data types? **Yes** (through the Google Mobile Ads SDK)
+- Is all user data encrypted in transit? **Yes**
+- Do you provide a way for users to request deletion? **No server-side account data**; game progress is local
+  (Settings → Reset progress / uninstall). Advertising ID can be reset or deleted in Android settings.
+- Data types (collected **and** shared with Google; processed ephemerally: no; required: yes, users can't turn it off):
+  | Category | Type | Purposes |
+  |---|---|---|
+  | Location | Approximate location | Advertising or marketing, Analytics, Fraud prevention/security |
+  | App activity | App interactions | Advertising or marketing, Analytics |
+  | App info and performance | Crash logs, Diagnostics | Analytics, Fraud prevention/security |
+  | Device or other IDs | Device or other IDs | Advertising or marketing, Analytics, Fraud prevention/security |
+- Game progress (stored only on the device) is **not** "collected" under Play's definition.
 
 ## App content declarations (suggested)
-- Ads: **No ads**
+- Ads: **Yes**: AdMob banner on menu screens and interstitials between levels (Android app)
 - Target audience: **13 and over** (safest choice for a general-audience game; choosing under-13 brings in Families policy requirements)
 - News app: No · COVID-19 app: No · Government app: No · Financial features: None · Health: None
 - App access: **All functionality is available without special access** (no login)

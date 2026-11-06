@@ -40,6 +40,12 @@ body {
   -webkit-tap-highlight-color: transparent; padding-bottom: calc(84px + env(safe-area-inset-bottom));
 }
 body.focus { padding-bottom: 24px; }
+/* Android app: native AdMob banner sits at the very bottom; lift the tab bar above it */
+:root { --ad-h: 0px; }
+.native-app body { padding-bottom: calc(84px + var(--ad-h) + env(safe-area-inset-bottom)); }
+.native-app body.focus { padding-bottom: 24px; }
+.native-app .tabbar { bottom: var(--ad-h); }
+.wrap { padding-top: max(18px, env(safe-area-inset-top)); }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
 .wrap { max-width: 560px; margin: 0 auto; padding: 18px 16px 8px; }

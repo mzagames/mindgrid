@@ -28,7 +28,7 @@
 
 1. **Pure logic.** Every puzzle can be solved by reasoning. Daily puzzles are deterministic: everyone gets the same puzzle on the same date.
 2. **Short sessions.** Most puzzles take 1–5 minutes.
-3. **No clutter.** No ads, no accounts, no network needed after the first load.
+3. **No clutter.** No accounts, no network needed after the first load. Ads (Android app only) appear only between levels and on menu screens, never during a puzzle.
 4. **Never lose progress.** Every move is autosaved locally, and undo is unlimited.
 
 ---
@@ -121,6 +121,18 @@ Navigation: a bottom tab bar (Today · Journey · Archive · Stats · Settings).
 - **Audio:** tiny WebAudio sine blips for taps, hints, errors and wins. No audio files.
 - **Haptics:** `navigator.vibrate` on placement and when you win.
 - **Win:** a board pulse, confetti (skipped with *reduced motion*), and a random praise line ("Brilliant!", "Sharp mind!"…).
+
+---
+
+## 6b. Monetization (v1.3, Android app)
+- **Google AdMob** through the Capacitor plugin `@capacitor-community/admob` (`js/ads.js`).
+- **Interstitial between levels:** only when leaving the win screen (Next / Back), at most once every 3 solves and
+  at least 90 s apart. It never appears while a puzzle is in progress.
+- **Adaptive banner** at the bottom of the menu screens (Today, Journey, Archive, Stats). The tab bar moves up above it.
+  There is no banner on the puzzle, settings, how-to or privacy screens.
+- **Consent:** the Google UMP form is shown to EEA/UK users before ads load, and Settings → *Ad privacy choices* reopens it.
+- The **web version has no ads** (`js/ads.js` does nothing without the native bridge).
+- The native app is built in CI: `.github/workflows/android.yml` with `android-app/` (Capacitor 8).
 
 ---
 

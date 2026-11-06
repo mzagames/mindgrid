@@ -2,7 +2,7 @@
   "id": "./",
   "name": "MindGrid: Daily Logic Puzzles",
   "short_name": "MindGrid",
-  "description": "Six calm daily logic puzzles. No ads, works offline.",
+  "description": "Six calm daily logic puzzles. Free, no account needed, works offline.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

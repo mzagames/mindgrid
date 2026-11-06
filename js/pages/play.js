@@ -134,6 +134,7 @@
     const time = Math.max(1, Math.round(elapsed));
     const out = MG.recordResult(key, { type: type, diff: diff, mode: mode, day: day, level: level, time: time, hints: hints });
     const best = MG.getResult(key);
+    if (MG.adsSolved) MG.adsSolved();
     stage.querySelector('.board').classList.add('solved');
     updateTools();
     MG.sfx('win'); MG.buzz([20, 40, 30]);
@@ -159,6 +160,12 @@
         <a class="btn ghost" href="${backHref}">${mode === 'journey' ? 'Journey map' : 'Back to puzzles'}</a>`, { dismissable: true });
       const sw = wm.el.querySelector('#shareWin');
       if (sw) sw.addEventListener('click', () => MG.shareDay(day, diff));
+      // Between levels: leaving the win screen is the only place an interstitial may appear.
+      wm.el.querySelectorAll('a.btn').forEach((a) => a.addEventListener('click', (e) => {
+        if (!MG.adsBetweenLevels) return;
+        e.preventDefault();
+        MG.adsBetweenLevels(() => { location.href = a.href; });
+      }));
     }, 800);
   }
 

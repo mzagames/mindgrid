@@ -1,7 +1,7 @@
 # MindGrid: Daily Logic Puzzles
 
 A calm, minimalist **brain-training game** with six original logic puzzles. There's a new set every day, an endless
-level journey, a free archive, streaks and stats. No ads, no accounts, and it works offline (installable PWA).
+level journey, a free archive, streaks and stats. No accounts, and it works offline. The web version is ad-free; the Android app is supported by AdMob ads between levels.
 
 > Built by **MZA Games**. It's in the same genre as daily-puzzle apps such as Voodoo's *The Almanac*. The
 > research notes and full design are in [GAME_DESIGN.md](GAME_DESIGN.md). All code, art, puzzle generators and

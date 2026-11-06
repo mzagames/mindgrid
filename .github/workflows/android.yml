@@ -1,0 +1,89 @@
+# Builds the signed Android App Bundle (.aab) for Google Play: Capacitor + AdMob.
+# Run it from GitHub: Actions → "Android release (AAB)" → Run workflow. Or push a tag like android-v1.3.0.
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64   base64 of the upload keystore file
+#   ANDROID_KEYSTORE_PASSWORD keystore password
+#   ANDROID_KEY_PASSWORD      key password (alias: mindgrid)
+name: Android release (AAB)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['android-v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: android-app
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Read version
+        run: echo "VERSION_NAME=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+
+      - name: Install Capacitor + AdMob plugin
+        run: npm install --no-audit --no-fund
+
+      - name: Copy web game into the app
+        run: node scripts/copy-web.mjs
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: App icons and splash
+        run: npx capacitor-assets generate --android
+
+      - name: AdMob app ID and version
+        run: node scripts/patch-android.mjs
+
+      - name: Sync
+        run: npx cap sync android
+
+      - name: Build release bundle
+        working-directory: android-app/android
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Sign bundle
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KS_B64" ] || [ -z "$KS_PASS" ]; then
+            echo "::error::Add ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_PASSWORD repository secrets."
+            exit 1
+          fi
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          AAB=android/app/build/outputs/bundle/release/app-release.aab
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore "$RUNNER_TEMP/upload.keystore" -storepass "$KS_PASS" -keypass "${KEY_PASS:-$KS_PASS}" \
+            "$AAB" mindgrid
+          jarsigner -verify "$AAB"
+          rm -f "$RUNNER_TEMP/upload.keystore"
+          mkdir -p out
+          cp "$AAB" "out/MindGrid-${VERSION_NAME}-${VERSION_CODE}.aab"
+          ls -l out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MindGrid-${{ env.VERSION_NAME }}-${{ env.VERSION_CODE }}-aab
+          path: android-app/out/*.aab
+          if-no-files-found: error
+          retention-days: 30

@@ -47,6 +47,22 @@ foreach ($item in @(@('assets/icon-maskable-512.png', 0.82), @('store/play-icon-
   DrawMark $g 0 0 512 $item[1]
   Save $cv[0] $g (Join-Path $root $item[0])
 }
+# 2b) Android app sources for @capacitor/assets (android-app/assets)
+$aa = Join-Path $root 'android-app/assets'
+New-Item -ItemType Directory -Force $aa | Out-Null
+$cv = NewCanvas 1024 1024; $g = $cv[1]; $g.Clear((Col '#1e1c19')); DrawMark $g 0 0 1024 0.9
+Save $cv[0] $g (Join-Path $aa 'icon-only.png')
+$cv = NewCanvas 1024 1024; $g = $cv[1]; $g.Clear([System.Drawing.Color]::Transparent); DrawMark $g 0 0 1024 0.62
+Save $cv[0] $g (Join-Path $aa 'icon-foreground.png')
+$cv = NewCanvas 1024 1024; $g = $cv[1]; $g.Clear((Col '#1e1c19'))
+Save $cv[0] $g (Join-Path $aa 'icon-background.png')
+foreach ($sp in @(@('splash.png', '#f6f3ec'), @('splash-dark.png', '#141412'))) {
+  $cv = NewCanvas 2732 2732; $g = $cv[1]; $g.Clear((Col $sp[1]))
+  Fill $g (RoundRect 1116 1116 500 500 125) '#1e1c19'
+  DrawMark $g 1116 1116 500 1.0
+  Save $cv[0] $g (Join-Path $aa $sp[0])
+}
+
 # 3) Feature graphic 1024x500 (no transparency)
 $cv = NewCanvas 1024 500; $g = $cv[1]
 $g.Clear((Col '#f6f3ec'))

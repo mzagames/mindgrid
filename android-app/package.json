@@ -1,0 +1,20 @@
+{
+  "name": "mindgrid-android",
+  "private": true,
+  "version": "1.3.0",
+  "description": "Native Android shell (Capacitor) for MindGrid with Google AdMob ads. Built by .github/workflows/android.yml.",
+  "type": "module",
+  "scripts": {
+    "copy-web": "node scripts/copy-web.mjs",
+    "patch": "node scripts/patch-android.mjs"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "8.3.0",
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "4.0.0",
+    "@capacitor/cli": "8.6.0"
+  }
+}
