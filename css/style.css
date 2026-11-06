@@ -156,7 +156,7 @@ details.rules li { margin: 4px 0; }
 details.rules p { margin: 6px 0 14px; color: var(--muted); font-size: 14px; }
 
 /* Blocks */
-.blocks-board { border-radius: 14px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); overflow: hidden; }
+.blocks-board { border-radius: 14px; background: var(--surface); overflow: hidden; }
 .blocks-board .grid { z-index: 2; pointer-events: none; }
 .blocks-board .cell { border-right: 1px dashed var(--line); border-bottom: 1px dashed var(--line); display: grid; place-items: center; }
 .blocks-board .cell b { font-size: calc(100cqw / var(--n) * .42); font-weight: 800; }
@@ -172,7 +172,7 @@ details.rules p { margin: 6px 0 14px; color: var(--muted); font-size: 14px; }
 }
 
 /* Pipes */
-.pipes-board { border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 2px var(--ink); background: var(--surface); }
+.pipes-board { border-radius: 14px; overflow: hidden; background: var(--surface); }
 .pipes-board .cell { border: 0; padding: 0; margin: 0; background: transparent; cursor: pointer; box-shadow: inset 0 0 0 .5px var(--line); }
 .pipes-board .rotor { width: 100%; height: 100%; transition: transform .18s ease; }
 .pipe { width: 100%; height: 100%; display: block; }
@@ -188,7 +188,7 @@ details.rules p { margin: 6px 0 14px; color: var(--muted); font-size: 14px; }
 .pipes-board .cell.hinted { background: color-mix(in srgb, var(--c-pipes) 12%, transparent); }
 
 /* Link */
-.link-board { border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 2px var(--ink); background: var(--surface); }
+.link-board { border-radius: 14px; overflow: hidden; background: var(--surface); }
 .link-board .bg .cell { box-shadow: inset 0 0 0 .5px var(--line); transition: background .12s; }
 .link-board .bg .cell.on { background: color-mix(in srgb, var(--c-link) 16%, var(--surface)); }
 .link-board .trail { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -222,7 +222,11 @@ details.rules p { margin: 6px 0 14px; color: var(--muted); font-size: 14px; }
 .moves b { color: var(--text); }
 
 /* Balance */
-.balance-board { border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 2px var(--ink); background: var(--surface); }
+.balance-board { border-radius: 14px; overflow: hidden; background: var(--surface); }
+/* Board outline drawn on top so cell backgrounds never hide it */
+.blocks-board::after, .pipes-board::after, .link-board::after, .balance-board::after {
+  content: ""; position: absolute; inset: 0; border-radius: 14px; box-shadow: inset 0 0 0 2px var(--ink); pointer-events: none; z-index: 4;
+}
 .balance-board .cell {
   border: 0; padding: 0; margin: 0; background: transparent; cursor: pointer; display: grid; place-items: center;
   box-shadow: inset 0 0 0 .5px var(--line); position: relative;

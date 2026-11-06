@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>MindGrid demo seed</title></head>
+<body>
+  <!-- Dev tool: fills localStorage with realistic sample progress for store screenshots (tools/screenshots.ps1). -->
+  <pre id="out">seeding…</pre>
+  <script src="../js/core.js"></script>
+  <script src="../js/puzzles/blocks.js"></script>
+  <script src="../js/puzzles/pipes.js"></script>
+  <script src="../js/puzzles/link.js"></script>
+  <script src="../js/puzzles/crowns.js"></script>
+  <script src="../js/puzzles/lights.js"></script>
+  <script src="../js/puzzles/balance.js"></script>
+  <script>
+    (function () {
+      var theme = new URLSearchParams(location.search).get('theme') || 'light';
+      MG.resetAll();
+      var s = MG.load(), t = MG.today(), diff = 'medium';
+      s.settings.theme = theme; s.settings.dailyDiff = diff;
+      MG.ORDER.forEach(function (k) { s.settings.seen[k] = true; });
+      function gen(type) { var key = MG.dailyKey(t, type, diff); return { key: key, P: MG.puzzles[type].generate(MG.rng(MG.seedFor(key)), diff) }; }
+
+      // solved today
+      [['blocks', 83], ['lights', 47]].forEach(function (x) {
+        s.results[MG.dailyKey(t, x[0], diff)] = { type: x[0], diff: diff, mode: 'daily', day: t, time: x[1], hints: 0, at: t, plays: 1 };
+        s.log.push({ type: x[0], diff: diff, time: x[1], hints: 0, at: t, mode: 'daily' });
+      });
+      // a 9-day streak and a journey in progress
+      var prng = MG.rng('demo-days');
+      for (var i = 0; i < 9; i++) {
+        var d = MG.addDays(t, -i), count = 0;
+        if (i > 0) MG.ORDER.forEach(function (ty) {
+          if (prng.next() < 0.7) {
+            count++;
+            s.results[MG.dailyKey(d, ty, diff)] = { type: ty, diff: diff, mode: 'daily', day: d, time: 45 + prng.int(150), hints: 0, at: d, plays: 1 };
+          }
+        });
+        s.days[d] = Math.max(1, count);
+      }
+      s.journey.level = 14;
+      for (var lv = 1; lv < 14; lv++) {
+        var sp = MG.journeySpec(lv), tm = 40 + (lv * 37) % 120;
+        s.results[MG.journeyKey(lv)] = { type: sp.type, diff: sp.diff, mode: 'journey', time: tm, hints: lv % 4 === 0 ? 1 : 0, at: t, plays: 1 };
+        s.log.push({ type: sp.type, diff: sp.diff, time: tm, hints: 0, at: t, mode: 'journey' });
+      }
+
+      // Crowns mid-game: 3 crowns plus the X marks a player would deduce
+      var C = gen('crowns'), n = C.P.n, marks = new Array(n * n).fill(0);
+      for (var r = 0; r < 3; r++) {
+        var cc = C.P.solution[r];
+        for (var j = 0; j < n * n; j++) {
+          var jr = Math.floor(j / n), jc = j % n;
+          if (jr === r || jc === cc || (Math.abs(jr - r) <= 1 && Math.abs(jc - cc) <= 1) || C.P.regions[j] === C.P.regions[r * n + cc]) marks[j] = 1;
+        }
+        marks[r * n + cc] = 2;
+      }
+      s.progress[C.key] = { snap: marks, elapsed: 96, hints: 0 };
+
+      // Link mid-game: path up to number 6
+      var L = gen('link');
+      s.progress[L.key] = { snap: L.P.solution.slice(0, L.P.checkpoints[5] + 1), elapsed: 58, hints: 0 };
+
+      // Pipes mid-game: tiles on the source's side of the board solved
+      var Pp = gen('pipes'), pn = Pp.P.n, turns = [];
+      function rot(m) { return ((m << 1) | (m >> 3)) & 15; }
+      Pp.P.tiles.forEach(function (m, i) {
+        var k = 0, cur = m;
+        while (cur !== Pp.P.solution[i] && k < 4) { cur = rot(cur); k++; }
+        turns.push(Math.floor(i / pn) <= Math.floor(pn / 2) || i % pn === Math.floor(pn / 2) ? k : 0);
+      });
+      s.progress[Pp.key] = { snap: turns, elapsed: 41, hints: 0 };
+
+      // Balance mid-game: givens plus ~55% of the rest filled correctly
+      var B = gen('balance'), rng = MG.rng('demo'), cur = B.P.givens.slice();
+      cur.forEach(function (v, i) { if (v === -1 && rng.next() < 0.55) cur[i] = B.P.solution[i]; });
+      s.progress[B.key] = { snap: cur, elapsed: 73, hints: 0 };
+
+      MG.save();
+      document.getElementById('out').textContent = 'seeded ' + t + ' (' + theme + ')';
+      document.title = 'SEEDED';
+    })();
+  </script>
+</body>
+</html>
