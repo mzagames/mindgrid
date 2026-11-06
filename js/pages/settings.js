@@ -25,6 +25,7 @@
       <h2>App</h2>
       <div class="group">
         <div class="row"><div class="lbl">How to play<small>Rules for every puzzle</small></div><a class="chip" href="howto.html">Open</a></div>
+        <div class="row"><div class="lbl">Privacy policy<small>MindGrid collects no personal data</small></div><a class="chip" href="privacy.html">Open</a></div>
         <div class="row" id="installRow" style="display:${installEvt ? 'flex' : 'none'}"><div class="lbl">Install MindGrid<small>Play offline from your home screen</small></div><button type="button" class="chip" id="install">Install</button></div>
         <div class="row"><div class="lbl">Reset progress<small>Erase streaks, stats and saved games on this device</small></div><button type="button" class="chip" id="reset" style="color:var(--bad)">Reset</button></div>
       </div>
