@@ -7,6 +7,8 @@ level journey, a free archive, streaks and stats. No ads, no accounts, and it wo
 > research notes and full design are in [GAME_DESIGN.md](GAME_DESIGN.md). All code, art, puzzle generators and
 > names are original.
 
+### ▶ Play now: https://mzagames.github.io/mindgrid/
+
 ## Puzzles
 
 | | Puzzle | Goal |
