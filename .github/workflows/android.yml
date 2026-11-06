@@ -24,13 +24,13 @@ jobs:
     env:
       VERSION_CODE: ${{ github.run_number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -81,7 +81,7 @@ jobs:
           cp "$AAB" "out/MindGrid-${VERSION_NAME}-${VERSION_CODE}.aab"
           ls -l out
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: MindGrid-${{ env.VERSION_NAME }}-${{ env.VERSION_CODE }}-aab
           path: android-app/out/*.aab
