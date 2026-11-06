@@ -1,5 +1,5 @@
-/* MindGrid service worker: pre-cache everything, serve cache-first, refresh in background. */
-const CACHE = 'mindgrid-v1.1.0';
+/* MindGrid service worker: network-first (always fresh when online), cache fallback (works offline). */
+const CACHE = 'mindgrid-v1.1.1';
 const FILES = [
   './', 'index.html', 'play.html', 'journey.html', 'archive.html', 'stats.html', 'settings.html', 'howto.html',
   'manifest.webmanifest', 'assets/icon.svg', 'css/style.css', 'js/core.js',
@@ -9,19 +9,23 @@ const FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' bypasses the browser HTTP cache so a new version never pre-caches stale files
+  e.waitUntil(caches.open(CACHE)
+    .then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
-  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then((hit) => {
-    const net = fetch(e.request).then((res) => {
-      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
+  const url = new URL(e.request.url);
+  if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  const key = url.origin + url.pathname; // play.html?type=x and play.html share one cache entry
+  e.respondWith(
+    fetch(e.request, { cache: 'no-cache' }).then((res) => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); }
       return res;
-    }).catch(() => hit);
-    return hit || net;
-  }));
+    }).catch(() => caches.match(key).then((hit) => hit || caches.match(e.request, { ignoreSearch: true })))
+  );
 });
