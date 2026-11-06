@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MindGrid Tests</title>
+  <style>
+    body { font: 14px/1.5 ui-monospace, Consolas, monospace; background: #111; color: #ddd; padding: 16px; }
+    .fail { color: #ff6b6b; } .pass { color: #6bdc8b; }
+  </style>
+</head>
+<body>
+  <h1>MindGrid generator tests</h1>
+  <pre id="out">Running…</pre>
+  <script src="../js/core.js"></script>
+  <script src="../js/puzzles/blocks.js"></script>
+  <script src="../js/puzzles/pipes.js"></script>
+  <script src="../js/puzzles/link.js"></script>
+  <script src="../js/puzzles/crowns.js"></script>
+  <script src="../js/puzzles/lights.js"></script>
+  <script src="spec.js"></script>
+  <script>
+    setTimeout(function () {
+      var out = document.getElementById('out'), seeds = +(new URLSearchParams(location.search).get('seeds') || 40);
+      out.textContent = '';
+      var fails = runSpec(MG, seeds, function (msg, bad) {
+        var line = document.createElement('div');
+        line.textContent = msg;
+        line.className = bad ? 'fail' : (msg === 'ALL PASSED' ? 'pass' : '');
+        out.appendChild(line);
+      });
+      document.title = fails ? 'FAIL' : 'PASS';
+    }, 50);
+  </script>
+</body>
+</html>

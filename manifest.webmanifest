@@ -1,0 +1,14 @@
+{
+  "name": "MindGrid: Daily Logic Puzzles",
+  "short_name": "MindGrid",
+  "description": "Five calm daily logic puzzles. No ads, works offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f3ec",
+  "theme_color": "#1e1c19",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
