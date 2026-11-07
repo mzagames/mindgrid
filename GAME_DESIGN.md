@@ -196,3 +196,18 @@ MindGrid/
 - Weekly themed challenge and achievements.
 - Optional cloud sync (Supabase or Firebase) to keep progress across devices.
 - Native wrappers (Capacitor) for Play Store and App Store builds.
+
+## 9. v1.4: "Make it a game" update
+
+| Area | What changed |
+|---|---|
+| Look | Vivid violet/navy theme (light and dark), glossy chunky buttons, floating tab bar, glowing boards, Nunito font. |
+| Puzzle art | Each puzzle has its own animated tile icon (sliding block, flowing pipe, path drawing, bobbing crown, glowing cells, spinning sun). Duotone UI icons. |
+| Intro | Splash once per app session: MZA Games logo, then the MindGrid tiles assemble with a loading bar and a tip. Native Android splash matches it. |
+| Home hub | Puzzle IQ gauge, a big Journey button, the Daily challenge, **Puzzle modes** (one puzzle type with its own levels) and **Mix Mode**. |
+| Modes | `practice` (`p:<type>:<n>`, Easy 1–5, Medium 6–15, Hard 16–35, Expert after) and `mix` (`m:<n>`, never the same puzzle twice in a row, faster ramp). |
+| Journey | A world map, bottom to top: 9 themed worlds of 12 levels (Sunrise Meadow, Coral Lagoon, Amber Dunes, Frost Peaks, Candy Clouds, Neon City, Crystal Caves, Lava Forge, Starfield), a road that turns gold as you go, stars under levels, a "YOU" marker. |
+| Stars | 3 = no hints and within par time; 2 = at most one hint and within 2× par; 1 = solved. A live target above the board shows what you still need. |
+| Puzzle IQ | For-fun rating (70–160). Each solve scores difficulty base + speed vs par − hints − heavy undo use + a no-hint streak bonus. IQ moves toward each score (bigger steps while calibrating; revealed after 3 solves). Each puzzle has its own skill rating. Ranks: Rising Thinker → Grand Master. Existing players get an IQ built from their solve log. |
+| Win screen | Ribbon, stars popping in with rising chimes, speed rating, IQ counting up with its change, rank-up fanfare, confetti burst, board shine sweep. |
+| Ads | Banner is kept for the whole app session (hidden on puzzles, resumed on menus), retried with backoff when a load fails, restored when the app returns to the foreground. A short branded "ad break" card shows before an interstitial. |

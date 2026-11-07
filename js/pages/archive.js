@@ -20,7 +20,7 @@
       if (count) any++;
       if (count === MG.ORDER.length) full++;
       const dots = MG.ORDER.map((t) => `<i class="${solved[t] ? 'on' : ''}" style="--pc:${MG.puzzles[t].color}"></i>`).join('');
-      cells += `<a class="day${key === today ? ' today' : ''}${count === MG.ORDER.length ? ' full' : ''}" href="index.html?date=${key}"
+      cells += `<a class="day${key === today ? ' today' : ''}${count === MG.ORDER.length ? ' full' : ''}" href="daily.html?date=${key}"
         aria-label="${MG.prettyDate(key)}: ${count} of ${MG.ORDER.length} solved">${d}<span class="dots">${dots}</span></a>`;
     }
     app.innerHTML = `
@@ -39,5 +39,5 @@
     if (canNext) n.addEventListener('click', () => { m++; if (m > 11) { m = 0; y++; } render(); });
   }
   render();
-  MG.renderTabs('archive');
+  MG.renderTabs('daily');
 })();

@@ -3,7 +3,7 @@
   "appName": "MindGrid",
   "webDir": "www",
   "android": {
-    "backgroundColor": "#f6f3ec",
+    "backgroundColor": "#120c35",
     "allowMixedContent": false
   }
 }

@@ -30,7 +30,9 @@
         <div class="row" id="installRow" style="display:${installEvt ? 'flex' : 'none'}"><div class="lbl">Install MindGrid<small>Play offline from your home screen</small></div><button type="button" class="chip" id="install">Install</button></div>
         <div class="row"><div class="lbl">Reset progress<small>Erase streaks, stats and saved games on this device</small></div><button type="button" class="chip" id="reset" style="color:var(--bad)">Reset</button></div>
       </div>
-      <p class="about">MindGrid v${MG.VERSION} · by MZA Games<br>No account needed. Your progress stays on this device.${MG.adsAvailable ? '<br>Ads between levels keep MindGrid free.' : ''}</p>`;
+      <p class="about"><img src="assets/mza-games-logo.png" alt="MZA Games">MindGrid v${MG.VERSION} · by MZA Games<br>
+        <button type="button" class="chip" id="replaySplash" style="margin:10px 0">${MG.icon('play')}Replay intro</button><br>No account needed. Your progress stays on this device.${MG.adsAvailable ? '<br>Ads between levels keep MindGrid free.' : ''}</p>`;
+    document.getElementById('replaySplash').addEventListener('click', () => MG.splash(true));
     const ap = document.getElementById('adPrivacy');
     if (ap) ap.addEventListener('click', () => MG.adsPrivacyOptions());
     app.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => { MG.setSetting('theme', b.dataset.t); render(); }));

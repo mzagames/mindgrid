@@ -43,11 +43,12 @@ puzzle), and supports **Undo, Reset, Hint and autosave**. Tap **Share** to copy 
 
 | Page | What it does |
 |---|---|
-| `index.html` | **Today**: the six daily puzzles, difficulty picker, streak, progress, share |
+| `index.html` | **Home**: Puzzle IQ, Journey button, Daily challenge, Puzzle modes and Mix Mode |
+| `daily.html` | **Daily**: the six daily puzzles, difficulty picker, streak, progress, share |
 | `play.html` | The puzzle screen: timer, tools, tutorial, win screen |
-| `journey.html` | **Journey**: an endless winding level map (Easy → Expert) |
+| `journey.html` | **Journey**: a world map of themed worlds, 12 levels each, with stars |
 | `archive.html` | **Archive**: a calendar of every past day (free to replay) |
-| `stats.html` | Streaks, totals, last 7 days, best times |
+| `stats.html` | **Puzzle IQ**: rank, skills per puzzle, IQ trend, streaks, best times |
 | `settings.html` | Theme (system/light/dark), sound, haptics, timer, reset, install |
 | `howto.html` | Rules and controls for all puzzles |
 

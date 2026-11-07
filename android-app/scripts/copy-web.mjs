@@ -7,7 +7,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const site = join(here, '..', '..');
 const www = join(here, '..', 'www');
 const items = [
-  'index.html', 'play.html', 'journey.html', 'archive.html', 'stats.html', 'settings.html', 'howto.html', 'privacy.html',
+  'index.html', 'daily.html', 'play.html', 'journey.html', 'archive.html', 'stats.html', 'settings.html', 'howto.html', 'privacy.html',
   'manifest.webmanifest', 'css', 'js', 'assets'
 ];
 
