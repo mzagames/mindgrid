@@ -7,7 +7,23 @@ level journey, a free archive, streaks and stats. No accounts, and it works offl
 > research notes and full design are in [GAME_DESIGN.md](GAME_DESIGN.md). All code, art, puzzle generators and
 > names are original.
 
-### ▶ Play now: https://mzagames.github.io/mindgrid/
+| | Link |
+|---|---|
+| ▶ **Play in your browser** | https://mzagames.github.io/mindgrid/ |
+| 🤖 **Android beta (Google Play)** | https://play.google.com/apps/testing/com.mzagaming.mindgrid |
+| 🛍️ **MZA Gaming store** | https://mzagames.github.io/#mindgrid |
+| 🔒 **Privacy policy** | https://mzagames.github.io/mindgrid/privacy.html |
+| ✉️ **Support** | mzagamingsupport@gmail.com |
+
+The Android app (`com.mzagaming.mindgrid`) is in closed testing on Google Play. To join, become a tester through the
+link above with the Google account that's on our tester list or in the App Hive group.
+
+<p>
+  <img src="store/screenshots/01-today.png" width="180" alt="Today screen">
+  <img src="store/screenshots/02-crowns.png" width="180" alt="Crowns puzzle">
+  <img src="store/screenshots/03-link.png" width="180" alt="Link puzzle">
+  <img src="store/screenshots/05-balance.png" width="180" alt="Balance puzzle">
+</p>
 
 ## Puzzles
 
