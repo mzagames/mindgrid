@@ -82,4 +82,9 @@
   if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
   window.scrollTo(0, 0);
   MG.renderTabs('stats');
+  MG.pageIntro(null, 'stats', [
+    { el: '.iqhero', title: 'Your Puzzle IQ', text: 'A fun score from your speed, the difficulty, hints and undos. It changes after every puzzle.', tap: false },
+    { el: '.ranks', title: 'Ranks', text: 'Raise your IQ to climb from Rising Thinker all the way to Grand Master.', tap: false },
+    { el: '.skills', title: 'Skills', text: 'Each puzzle trains a different skill. Play your weakest one to grow it!', tap: false }
+  ]);
 })();

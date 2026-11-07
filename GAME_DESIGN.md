@@ -211,3 +211,13 @@ MindGrid/
 | Puzzle IQ | For-fun rating (70–160). Each solve scores difficulty base + speed vs par − hints − heavy undo use + a no-hint streak bonus. IQ moves toward each score (bigger steps while calibrating; revealed after 3 solves). Each puzzle has its own skill rating. Ranks: Rising Thinker → Grand Master. Existing players get an IQ built from their solve log. |
 | Win screen | Ribbon, stars popping in with rising chimes, speed rating, IQ counting up with its change, rank-up fanfare, confetti burst, board shine sweep. |
 | Ads | Banner is kept for the whole app session (hidden on puzzles, resumed on menus), retried with backoff when a load fails, restored when the app returns to the foreground. A short branded "ad break" card shows before an interstitial. |
+
+## 10. v1.4.1: tutorials and "just completed" moments
+
+| Area | What changed |
+|---|---|
+| Hand | A shaded pointing hand (skin gradient, nail, knuckle creases, violet MindGrid cuff) drives every tutorial. |
+| Puzzle intros | First time you open a puzzle, a mini board plays itself: the hand drags, taps and rotates while step captions explain the rules (`js/tutorial.js`, `DEMOS`). Replay from How to play → Watch demo. |
+| Screen tours | First visit to Home, Journey, Daily, Archive, IQ, Settings, How to play and the play screen: the screen dims, one element is spotlighted, the hand taps it, with a short tip (Next / Skip). Stored as `seen["tour:<id>"]`; Settings → Replay tutorials resets them. |
+| Solved stamp | On a solve, a "Solved!/Perfect!" stamp with stars pops on the board before the win screen. |
+| Just completed | Back on the screen you came from, the finished item pops, its stars drop in, a badge and sparkles appear: Journey (road grows gold, YOU walks to the next level), Puzzle mode and Mix tiles (level bar fills), Daily cards (progress bar fills). |

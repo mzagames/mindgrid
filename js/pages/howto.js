@@ -7,7 +7,9 @@
     return `<div class="card" style="--pc:${P.color}"><div class="pic">${P.icon}</div>
       <div class="body"><div class="title">${P.name}</div><ol>${P.rules.map((r) => '<li>' + r + '</li>').join('')}</ol>
       <p class="ctl"><b>Controls:</b> ${P.controls}</p>
-      <a class="status go" style="margin-top:8px" href="play.html?mode=practice&type=${t}">${MG.icon('play')} Play ${P.name}</a></div></div>`;
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button type="button" class="status prog" data-demo="${t}" style="border:0;cursor:pointer">${MG.icon('help')} Watch demo</button>
+        <a class="status go" href="play.html?mode=practice&type=${t}">${MG.icon('play')} Play ${P.name}</a></div></div></div>`;
   }).join('');
   app.innerHTML = `
     <header class="topbar"><div class="brand">${MG.LOGO}How to play</div></header>
@@ -23,4 +25,8 @@
       <div class="row"><div class="lbl">Tools<small>Undo (Ctrl+Z), Reset and Hint (H). Your progress saves automatically.</small></div></div>
     </div>`;
   MG.renderTabs('home');
+  app.querySelectorAll('[data-demo]').forEach((b) => b.addEventListener('click', () => MG.tutorial(b.dataset.demo, { replay: true })));
+  MG.pageIntro(null, 'howto', [
+    { el: '[data-demo]', title: 'Watch a demo', text: 'See the hand play any puzzle step by step, as often as you like.' }
+  ]);
 })();

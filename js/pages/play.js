@@ -168,8 +168,16 @@
     updateTools();
     MG.sfx('win'); MG.buzz([20, 40, 30, 40, 60]);
     parline.innerHTML = '';
-    setTimeout(() => MG.confetti(out.stars === 3), 150);
+    if (MG.markJustDone) MG.markJustDone({ mode: mode, key: key, type: type, level: level, day: day, diff: diff, stars: out.stars });
+    // a quick "Solved!" stamp pops on the board first, then the full win screen
+    const board = stage.querySelector('.board');
+    const stamp = MG.h('div', 'stamp', `<small>${mode === 'daily' ? P.name : 'Level ' + level}</small>${out.stars === 3 ? 'Perfect!' : 'Solved!'}${MG.stars(out.stars)}`);
+    stamp.style.setProperty('--pc', P.color);
+    setTimeout(() => { board.appendChild(stamp); MG.sfx('star1'); }, 250);
+    setTimeout(() => stamp.classList.add('out'), 1250);
+    setTimeout(() => MG.confetti(out.stars === 3), 350);
     setTimeout(() => {
+      stamp.remove();
       const titles = out.stars === 3 ? ['Perfect!', 'Brilliant!', 'Genius move!', 'Flawless!'] : out.stars === 2 ? ['Great job!', 'Nicely done!', 'Sharp!'] : ['Solved!', 'You did it!', 'Got there!'];
       const nx = nextHref(), st = MG.streak();
       const rankUp = !out.calibrating && out.iqAfter > out.iqBefore && MG.rankOf(out.iqAfter) !== MG.rankOf(out.iqBefore);
@@ -215,7 +223,7 @@
         e.preventDefault();
         MG.adsBetweenLevels(() => { location.href = a.href; });
       }));
-    }, 900);
+    }, 1500);
   }
 
   function intro(done) { // Mix Mode: a quick "next up" reveal
@@ -225,20 +233,15 @@
     setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); done(); }, 300); }, MG.reduced ? 500 : 1300);
   }
 
-  // first-time tutorial
-  const seen = MG.settings().seen || {};
-  if (!seen[type]) {
-    const m = MG.modal(`
-      <div class="pic" style="--pc:${P.color}">${P.icon}</div>
-      <div class="eyebrow">New puzzle</div>
-      <h3>${P.name}</h3>
-      <ol>${P.rules.map((r) => '<li>' + r + '</li>').join('')}</ol>
-      <div class="ctl">${P.controls}</div>
-      <button type="button" class="btn" id="go">Let’s play ${MG.icon('play')}</button>`, {
-      onClose: () => { const s = MG.settings(); s.seen = Object.assign({}, s.seen, { [type]: true }); MG.save(); start(); }
-    });
-    m.el.style.setProperty('--pc', P.color);
-    m.el.querySelector('#go').addEventListener('click', m.close);
-  } else if (mode === 'mix' && !prog) intro(start);
-  else start();
+  // First time: an animated hand demo of this puzzle, then (once ever) a tour of the play screen.
+  const PLAY_TOUR = [
+    { el: '#stage .board', title: 'Your turn!', text: 'Play right here on the board, just like the hand showed you.' },
+    { el: '#parline', title: 'Earn 3 stars', text: 'Beat this time without hints for 3 stars and a bigger Puzzle IQ boost.', tap: false },
+    { el: '#hint', title: 'Stuck?', text: 'A hint solves one piece for you, but it costs stars and IQ points.' },
+    { el: '#undo', title: 'Made a mistake?', text: 'Undo your last move, or Reset to start over. Your progress saves automatically.' }
+  ];
+  function begin() { MG.tour('play', PLAY_TOUR, { onDone: start }); }
+  if (MG.needsTutorial(type)) MG.tutorial(type, { onDone: begin });
+  else if (mode === 'mix' && !prog) intro(begin);
+  else begin();
 })();

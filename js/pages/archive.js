@@ -40,4 +40,8 @@
   }
   render();
   MG.renderTabs('daily');
+  MG.pageIntro(null, 'archive', [
+    { el: '.cal a.day', title: 'Replay any day', text: 'Tap a day to play its six puzzles. The coloured dots show which ones you solved.' },
+    { el: '#prev', title: 'Earlier months', text: 'Go back month by month, up to a full year.' }
+  ]);
 })();

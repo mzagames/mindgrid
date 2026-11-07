@@ -36,6 +36,10 @@
   function y(i) { return H - PAD_B - (i - 1) * ROW - worldOf(i) * GAP; }
   function x(i, w) { const amp = Math.min(115, w * 0.27); return w / 2 + Math.sin((i - 1) * 0.92) * amp; }
 
+  // Just finished a journey level? Pop it, grow the road to the next one and walk the YOU marker there.
+  const jd = MG.takeJustDone((j) => j.mode === 'journey');
+  let advance = !!jd && jd.level === lvl - 1 && lvl > 1;
+
   function layout() {
     const w = map.clientWidth;
     let html = '';
@@ -57,25 +61,33 @@
         <small>World ${k + 1}</small><b>${info.title}</b><span class="ws">${MG.icon('star')}${stars}/${PER * 3}</span></div>`;
     }
     // road
-    let d = '', dDone = '';
+    let d = '', dDone = '', dPrev = '', seg = '';
     for (let i = 1; i <= total; i++) {
       const px = x(i, w), py = y(i);
       if (i === 1) d = `M${px},${py}`;
-      else { const ax = x(i - 1, w), ay = y(i - 1), my = (ay + py) / 2; d += ` C${ax},${my} ${px},${my} ${px},${py}`; }
+      else {
+        const ax = x(i - 1, w), ay = y(i - 1), my = (ay + py) / 2, c = ` C${ax},${my} ${px},${my} ${px},${py}`;
+        d += c;
+        if (i === lvl) seg = `M${ax},${ay}` + c;
+      }
       if (i === Math.min(lvl, total)) dDone = d;
+      if (i === lvl - 1) dPrev = d;
     }
+    const doneRoad = advance ? (lvl > 2 ? `<path class="r-done" d="${dPrev}"/>` : '') + `<path class="r-grow" id="grow" d="${seg}" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/>`
+      : lvl > 1 ? `<path class="r-done" d="${dDone}"/>` : '';
     html += `<svg class="road" viewBox="0 0 ${w} ${H}" preserveAspectRatio="none"><path class="r-edge" d="${d}"/><path class="r-base" d="${d}"/>
-      ${lvl > 1 ? `<path class="r-done" d="${dDone}"/>` : ''}<path class="r-dash" d="${d}"/></svg>`;
+      ${doneRoad}<path class="r-dash" d="${d}"/></svg>`;
     // level buttons
     for (let i = 1; i <= total; i++) {
       const spec = MG.journeySpec(i), P = MG.puzzles[spec.type], boss = i % PER === 0 ? ' boss' : '';
       const style = `left:${x(i, w)}px;top:${y(i)}px;--pc:${P.color}`;
       const mini = `<span class="pic mini" style="--pc:${P.color}">${P.icon}</span>`;
       if (i < lvl) {
-        html += `<a class="lvl${boss}" style="${style}" href="play.html?mode=journey&level=${i}" aria-label="Level ${i}, ${P.name}, replay">${i}${mini}${MG.stars(MG.getStars(MG.journeyKey(i)))}</a>`;
+        html += `<a class="lvl${boss}" id="lv${i}" style="${style}" href="play.html?mode=journey&level=${i}" aria-label="Level ${i}, ${P.name}, replay">${i}${mini}${MG.stars(MG.getStars(MG.journeyKey(i)))}</a>`;
       } else if (i === lvl) {
         html += `<a class="lvl current${boss}" id="cur" style="${style}" href="play.html?mode=journey&level=${i}" aria-label="Play level ${i}, ${P.name}">${i}${mini}</a>`;
-        html += `<div class="you" style="left:${x(i, w)}px;top:${y(i)}px">${MG.LOGO}<span>YOU</span></div>`;
+        const yi = advance ? i - 1 : i;
+        html += `<div class="you" id="you" style="left:${x(yi, w)}px;top:${y(yi)}px">${MG.LOGO}<span>YOU</span></div>`;
       } else {
         html += `<div class="lvl locked${boss}" style="${style}" aria-label="Level ${i} locked">${i <= lvl + 2 ? i : MG.icon('lock')}</div>`;
       }
@@ -91,4 +103,32 @@
     if (cur) cur.scrollIntoView({ block: 'center' });
   });
   MG.renderTabs('journey');
+
+  MG.pageIntro(() => {
+    if (!jd) return false;
+    const done = document.getElementById('lv' + jd.level);
+    if (!done) return false;
+    MG.celebrate(done, MG.starLabel(jd.stars) + ' Cleared!');
+    if (advance) {
+      const grow = document.getElementById('grow'), you = document.getElementById('you'), cur = document.getElementById('cur');
+      setTimeout(() => {
+        grow.style.transition = 'stroke-dashoffset .9s cubic-bezier(.5,0,.3,1)'; grow.style.strokeDashoffset = '0';
+        you.classList.add('walk'); you.style.left = cur.style.left; you.style.top = cur.style.top;
+        MG.sfx('whoosh');
+      }, 900);
+      setTimeout(() => {
+        advance = false; // later re-layouts (resize) draw the finished road
+        cur.classList.remove('justdone'); void cur.offsetWidth; cur.classList.add('justdone'); MG.sfx('place');
+        setTimeout(() => cur.classList.remove('justdone'), 800); // back to its idle bounce
+        const r = cur.getBoundingClientRect();
+        if (r.top < 80 || r.bottom > window.innerHeight - 160) cur.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, 1900);
+    }
+    return true;
+  }, 'journey', [
+    { el: '#cur', title: 'Your next level', text: 'The bouncing level is where you are. Tap it to play!', radius: 40 },
+    { el: '.lvl .stars', title: 'Collect stars', text: 'Each level gives up to 3 stars. Replay any level to earn more.' },
+    { el: '.world-banner', title: 'New worlds', text: 'Every 12 levels you reach a brand-new world with its own look.' },
+    { el: '.jplay', title: 'Quick play', text: 'Or tap here to jump straight into your next level.', fixed: true }
+  ]);
 })();

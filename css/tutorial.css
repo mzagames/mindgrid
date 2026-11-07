@@ -1,0 +1,122 @@
+/* MindGrid: tutorials (animated hand, puzzle demos, coach-mark tours) and "just completed" celebrations */
+.hand { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 5; pointer-events: none; transition-property: transform; transition-timing-function: cubic-bezier(.45, .05, .3, 1); }
+/* 80x102 viewBox drawn at 52px wide: the fingertip (30.5, 3) lands on the element origin */
+.hand svg { position: absolute; left: -20px; top: -2px; width: 52px; height: 66px; filter: drop-shadow(0 8px 10px rgba(30, 10, 80, .35)); transform-origin: 20px 2px; transition: transform .14s; transform: rotate(-10deg); }
+.hand.press svg { transform: rotate(-10deg) scale(.88) translateY(3px); }
+.hand .ripple { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; opacity: 0; box-shadow: 0 0 12px rgba(255, 255, 255, .8); }
+.hand .ripple.go { animation: ripple .55s ease-out; }
+.cm .hand.tapping svg { animation: handTap 1.3s ease-in-out infinite; }
+.cm .hand.tapping .ripple { animation: ripple 1.3s ease-out infinite; animation-delay: .25s; }
+@keyframes ripple { 0% { transform: scale(.3); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes handTap { 0%, 60%, 100% { transform: rotate(-10deg); } 20% { transform: rotate(-10deg) scale(.88) translateY(4px); } }
+
+/* Puzzle intro modal */
+.tut h3.tut-h { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 4px 0 12px; }
+.tut h3.tut-h .pic { width: 42px; height: 42px; border-radius: 13px; margin: 0; }
+.tut h3.tut-h .pic svg { width: 28px; height: 28px; }
+.demo-host { display: flex; justify-content: center; padding: 14px 0 6px; min-height: 236px; align-items: center;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--pc) 16%, transparent), transparent 70%); border-radius: 20px; }
+.demo { position: relative; }
+.demo-cap { min-height: 66px; margin: 12px 4px 6px; font-weight: 800; font-size: 16px; line-height: 1.35; }
+.demo-cap.in { animation: capIn .35s ease; }
+@keyframes capIn { from { opacity: 0; transform: translateY(6px); } }
+.demo-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.demo-dots i { width: 8px; height: 8px; border-radius: 99px; background: var(--line); transition: width .25s, background .25s; }
+.demo-dots i.on { width: 22px; background: var(--pc); }
+.tut-more { font-size: 13px; color: var(--muted); margin: 12px 0 0; font-weight: 700; }
+
+/* Mini demo boards */
+.dboard { position: relative; display: grid; border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--pc) 70%, var(--ink)), 0 10px 22px -8px color-mix(in srgb, var(--pc) 50%, transparent); }
+.dcell { position: relative; display: grid; place-items: center; box-shadow: inset 0 0 0 .5px var(--line); font-weight: 900; font-size: 22px; transition: background .2s; }
+.dcell b { position: relative; z-index: 2; }
+.dlayer { position: absolute; inset: 0; z-index: 1; }
+.drect { position: absolute; border-radius: 10px; }
+.drect.ghost { border: 2.5px dashed var(--c-blocks); background: color-mix(in srgb, var(--c-blocks) 16%, transparent); }
+.drect.ok { border: 2.5px solid var(--rc); background: color-mix(in srgb, var(--rc) 35%, transparent); animation: pop .25s; }
+.dboard.dwin { animation: solvedPulse .8s ease; }
+.dboard.dwin::after { content: ""; position: absolute; inset: 0; z-index: 4; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .6) 48%, transparent 66%) no-repeat; background-size: 250% 100%; animation: shine 1s ease both; }
+.dpipe { width: 100%; height: 100%; }
+.dpipe g { transform-origin: 50px 50px; transform-box: view-box; transition: transform .25s cubic-bezier(.3, 1.4, .6, 1); }
+.dpipe line { stroke: var(--pipe-off); stroke-width: 18; stroke-linecap: round; transition: stroke .2s; }
+.dpipe circle.src { fill: var(--c-pipes); }
+.dpipe circle.dot { fill: var(--surface); }
+.dpipe circle.end { fill: var(--surface); stroke: var(--pipe-off); stroke-width: 7; transition: stroke .2s; }
+.dcell.on .dpipe line { stroke: var(--c-pipes); }
+.dcell.on .dpipe circle.end { stroke: var(--c-pipes); }
+.dcell.on .dpipe { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--c-pipes) 70%, transparent)); }
+.dnum { position: relative; z-index: 2; width: 62%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; color: var(--surface); font-size: 20px; background: var(--ink); }
+.demo-link .dcell.on { background: color-mix(in srgb, var(--c-link) 18%, var(--surface)); }
+.dtrail { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.dtrail svg { width: 100%; height: 100%; }
+.dtrail polyline { fill: none; stroke: var(--c-link); stroke-width: .34; stroke-linecap: round; stroke-linejoin: round; }
+.dcrown { width: 64%; height: 64%; color: var(--ink); }
+.dcell.pop .dcrown { animation: pop .35s; }
+.dx { font-size: 24px; font-weight: 600; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+.dglow { gap: 6px; background: transparent; box-shadow: none; overflow: visible; }
+.dglow .dcell { border-radius: 14px; background: var(--glow-off); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .08); }
+.dglow .dcell.lit { background: radial-gradient(circle at 35% 30%, #fff 0%, color-mix(in srgb, var(--c-lights) 55%, #fff) 25%, var(--c-lights) 70%); box-shadow: 0 0 18px color-mix(in srgb, var(--c-lights) 70%, transparent); }
+.dbal .dcell.given { background: var(--surface2); }
+.dsun, .dmoon { width: 70%; height: 70%; animation: pop .2s; }
+.dbal .given .dsun, .dbal .given .dmoon { animation: none; }
+.dsun circle { fill: var(--sun); }
+.dsun path { stroke: var(--sun); stroke-width: 2; stroke-linecap: round; fill: none; }
+.dmoon path { fill: var(--moon); }
+
+/* Coach-mark tours */
+.cm { position: fixed; inset: 0; z-index: 95; cursor: pointer; animation: fade .25s; }
+.cm.out { opacity: 0; transition: opacity .25s; }
+.cm-spot { position: fixed; box-shadow: 0 0 0 9999px rgba(12, 7, 40, .74); transition: left .4s, top .4s, width .4s, height .4s, border-radius .4s; pointer-events: none; }
+.cm-spot::after { content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 3px solid #fff; opacity: .8; animation: spotPulse 1.4s ease-in-out infinite; }
+@keyframes spotPulse { 50% { inset: -9px; opacity: .25; } }
+.cm .hand { position: fixed; z-index: 2; }
+.cm-tip { position: fixed; left: 50%; transform: translateX(-50%); width: min(340px, calc(100% - 32px)); z-index: 3; cursor: default;
+  background: var(--surface); color: var(--text); border-radius: 22px; padding: 16px 16px 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); border: 2px solid var(--accent); }
+.cm-tip.in { animation: tipIn .35s cubic-bezier(.3, 1.4, .6, 1); }
+@keyframes tipIn { from { opacity: 0; transform: translateX(-50%) scale(.9); } }
+.cm-tip b { display: block; font-size: 18px; font-weight: 900; margin-bottom: 2px; }
+.cm-tip p { margin: 0 0 12px; font-size: 15px; font-weight: 700; line-height: 1.4; }
+.cm-foot { display: flex; align-items: center; gap: 8px; }
+.cm-dots { flex: 1; display: flex; gap: 5px; }
+.cm-dots i { width: 7px; height: 7px; border-radius: 99px; background: var(--line); }
+.cm-dots i.on { width: 18px; background: var(--accent); }
+.cm-skip { border: 0; background: transparent; color: var(--muted); font-weight: 900; font-size: 14px; padding: 8px 10px; cursor: pointer; }
+.cm-next { border: 0; cursor: pointer; font-weight: 900; font-size: 15px; color: #fff; padding: 9px 18px; border-radius: 12px;
+  background: linear-gradient(180deg, var(--accent2), var(--accent)); box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+.cm-next:active { transform: translateY(2px); box-shadow: none; }
+
+/* "Solved!" stamp over the board, before the win screen */
+.stamp { position: absolute; left: 50%; top: 50%; z-index: 8; transform: translate(-50%, -50%); pointer-events: none; text-align: center;
+  padding: 12px 26px 14px; border-radius: 22px; color: #fff; font-size: 34px; font-weight: 900; letter-spacing: -.01em; white-space: nowrap;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pc) 70%, #fff), var(--pc) 55%, color-mix(in srgb, var(--pc) 70%, #000));
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--pc) 55%, #000), 0 20px 40px rgba(0, 0, 0, .35); text-shadow: 0 2px 0 rgba(0, 0, 0, .2);
+  animation: stampIn .5s cubic-bezier(.3, 1.7, .55, 1) both; }
+.stamp small { display: block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .9; }
+.stamp .stars { justify-content: center; margin-top: 4px; }
+.stamp .stars .st { width: 22px; height: 22px; color: rgba(255, 255, 255, .35); }
+.stamp .stars .st.on { color: #ffd43b; }
+.stamp.out { animation: stampOut .3s ease both; }
+@keyframes stampIn { 0% { transform: translate(-50%, -50%) scale(.2) rotate(-12deg); opacity: 0; } 100% { transform: translate(-50%, -50%) rotate(-3deg); opacity: 1; } }
+@keyframes stampOut { to { transform: translate(-50%, -50%) scale(1.3) rotate(-3deg); opacity: 0; } }
+
+/* "Just completed" celebration on the section you return to */
+.justdone { animation: jdPop .7s cubic-bezier(.3, 1.6, .55, 1) both; z-index: 3; }
+@keyframes jdPop { 0% { transform: scale(.6); } 55% { transform: scale(1.12); } 100% { transform: none; } }
+.lvl.justdone { animation: jdPopLvl .7s cubic-bezier(.3, 1.6, .55, 1) both; }
+@keyframes jdPopLvl { 0% { transform: scale(.5); } 55% { transform: scale(1.25); } 100% { transform: none; } }
+.justdone .stars .st.on { animation: starIn .45s cubic-bezier(.3, 1.6, .6, 1) both; }
+.justdone .stars .st:nth-child(1) { animation-delay: .35s; }
+.justdone .stars .st:nth-child(2) { animation-delay: .55s; }
+.justdone .stars .st:nth-child(3) { animation-delay: .75s; }
+.jd-badge { position: absolute; z-index: 6; left: 50%; top: -14px; transform: translateX(-50%); background: var(--gold); color: #3b2500; font-size: 11.5px; font-weight: 900;
+  padding: 3px 10px; border-radius: 99px; white-space: nowrap; box-shadow: 0 3px 0 #c07d00; animation: badgeUp 2.4s ease both; pointer-events: none; letter-spacing: .04em; }
+@keyframes badgeUp { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.6); } 15%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -14px); } }
+.jd-ring { position: absolute; inset: -6px; border-radius: inherit; border: 4px solid var(--gold); pointer-events: none; animation: ring 1s ease-out 2; }
+.sparkle { position: absolute; z-index: 7; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: spark .9s ease-out both; }
+@keyframes spark { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--sx), var(--sy)) scale(.2); opacity: 0; } }
+.road .r-grow { fill: none; stroke: #ffd43b; stroke-width: 26; stroke-linecap: round; }
+.you.walk { animation: none; transition: left .9s cubic-bezier(.5, 0, .3, 1), top .9s cubic-bezier(.5, 0, .3, 1); }
+@media (prefers-reduced-motion: reduce) { .hand, .you.walk { transition: none !important; } }
+/* cards and tiles clip their overflow: keep the badge and ring inside them */
+.card .jd-badge, .mode .jd-badge { top: 8px; left: auto; right: 10px; animation-name: badgeIn2; z-index: 6; }
+.card .jd-ring, .mode .jd-ring { inset: 0; }
+@keyframes badgeIn2 { 0% { opacity: 0; transform: scale(.5); } 15%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }

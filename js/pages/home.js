@@ -87,5 +87,22 @@
   }
   render();
   MG.renderTabs('home');
+  MG.pageIntro(() => {
+    const jd = MG.takeJustDone((j) => j.mode === 'practice' || j.mode === 'mix');
+    if (!jd) return false;
+    const el = jd.mode === 'mix' ? app.querySelector('.mixmode') : app.querySelector(`.mode[href*="type=${jd.type}"]`);
+    if (!el) return false;
+    const bar = el.querySelector('.mbar i');
+    if (bar) { const w = bar.style.width; bar.style.transition = 'none'; bar.style.width = '0%'; requestAnimationFrame(() => { bar.style.transition = 'width 1s .4s ease'; bar.style.width = w; }); }
+    MG.celebrate(el, MG.starLabel(jd.stars) + ' Level ' + jd.level + ' cleared');
+    return true;
+  }, 'home', [
+    { el: '.iqhero', title: 'Your Puzzle IQ', text: 'It grows when you solve puzzles fast, on harder levels and without hints. Tap it to see your skills.' },
+    { el: '.bigplay', title: 'Journey', text: 'Travel through colourful worlds, one level at a time. Tap here to continue.' },
+    { el: '.dailycard', title: 'Daily challenge', text: 'Six fresh puzzles every day. Solve at least one daily to build your 🔥 streak.' },
+    { el: '.mixmode', title: 'Mix Mode', text: 'A surprise puzzle every level, never the same one twice in a row!' },
+    { el: '.modes .mode:not(.mixmode)', title: 'Puzzle modes', text: 'Love one puzzle? Pick it here and climb its own levels from Easy to Expert.' },
+    { el: '.tabbar', title: 'Find your way', text: 'Use these tabs to jump between Home, Journey, Daily, your IQ and Settings.', fixed: true, hy: 0.4 }
+  ]);
   window.addEventListener('pageshow', (e) => { if (e.persisted) render(); });
 })();

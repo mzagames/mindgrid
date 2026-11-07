@@ -31,8 +31,12 @@
         <div class="row"><div class="lbl">Reset progress<small>Erase streaks, stats and saved games on this device</small></div><button type="button" class="chip" id="reset" style="color:var(--bad)">Reset</button></div>
       </div>
       <p class="about"><img src="assets/mza-games-logo.png" alt="MZA Games">MindGrid v${MG.VERSION} · by MZA Games<br>
-        <button type="button" class="chip" id="replaySplash" style="margin:10px 0">${MG.icon('play')}Replay intro</button><br>No account needed. Your progress stays on this device.${MG.adsAvailable ? '<br>Ads between levels keep MindGrid free.' : ''}</p>`;
+        <button type="button" class="chip" id="replaySplash" style="margin:10px 0">${MG.icon('play')}Replay intro</button>
+        <button type="button" class="chip" id="replayTut" style="margin:10px 0">${MG.icon('help')}Replay tutorials</button><br>No account needed. Your progress stays on this device.${MG.adsAvailable ? '<br>Ads between levels keep MindGrid free.' : ''}</p>`;
     document.getElementById('replaySplash').addEventListener('click', () => MG.splash(true));
+    document.getElementById('replayTut').addEventListener('click', () => {
+      MG.resetTutorials(); MG.toast('Tutorials will show again on every screen');
+    });
     const ap = document.getElementById('adPrivacy');
     if (ap) ap.addEventListener('click', () => MG.adsPrivacyOptions());
     app.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => { MG.setSetting('theme', b.dataset.t); render(); }));
@@ -50,4 +54,8 @@
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; render(); });
   render();
   MG.renderTabs('settings');
+  MG.pageIntro(null, 'settings', [
+    { el: '.seg', title: 'Your style', text: 'Choose a light or dark look, or follow your phone.' },
+    { el: '#replayTut', title: 'Need a refresher?', text: 'Tap here any time to see every tutorial again.' }
+  ]);
 })();

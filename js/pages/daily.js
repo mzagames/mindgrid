@@ -43,5 +43,20 @@
   }
   render();
   MG.renderTabs('daily');
+  MG.pageIntro(() => {
+    const jd = MG.takeJustDone((j) => j.mode === 'daily' && j.day === day);
+    if (!jd) return false;
+    const el = app.querySelector(`a.card[href*="type=${jd.type}&"]`);
+    if (!el) return false;
+    const bar = app.querySelector('.progress .bar i');
+    if (bar) { const w = bar.style.width; bar.style.transition = 'none'; bar.style.width = Math.max(0, parseFloat(w) - 100 / 6) + '%'; requestAnimationFrame(() => { bar.style.transition = 'width .9s .5s ease'; bar.style.width = w; }); }
+    MG.celebrate(el, MG.starLabel(jd.stars) + ' Solved!');
+    return true;
+  }, 'daily', [
+    { el: '.seg', title: 'Pick a difficulty', text: 'Easy, Medium, Hard or Expert. Each difficulty has its own six daily puzzles.' },
+    { el: '#app a.card', title: 'Today’s puzzles', text: 'Tap any puzzle to play. Everyone in the world gets the same ones today.' },
+    { el: '.chip.flame', title: 'Daily streak', text: 'Solve at least one daily puzzle every day to keep your 🔥 streak growing.' },
+    { el: 'a.chip[href="archive.html"]', title: 'Archive', text: 'Missed a day? Replay any day from the past year here.' }
+  ]);
   window.addEventListener('pageshow', (e) => { if (e.persisted) render(); });
 })();

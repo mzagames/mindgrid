@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.4.0';
+  MG.VERSION = '1.4.1';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -433,10 +433,19 @@
   };
 
   /* ---------- Splash: MZA Games, then MindGrid (once per app session) ---------- */
+  var splashing = false, afterQ = [];
+  /** Run cb once the intro splash (if any) has finished, so tours never start underneath it. */
+  MG.afterSplash = function (cb) {
+    function go() { if (splashing) afterQ.push(cb); else cb(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(go, 0); });
+    else setTimeout(go, 0);
+  };
+  function splashEnded() { splashing = false; var q = afterQ; afterQ = []; q.forEach(function (f) { f(); }); }
   MG.splash = function (force) {
     var seen = false;
     try { seen = sessionStorage.getItem('mindgrid.splash') === '1'; sessionStorage.setItem('mindgrid.splash', '1'); } catch (e) { /* ignore */ }
     if (seen && !force) return;
+    splashing = true;
     var el = MG.h('div', 'splash', '<div class="sp-studio"><img src="assets/mza-games-logo.png" alt="MZA Games"><span>presents</span></div>' +
       '<div class="sp-game">' + MG.LOGO + '<h1 class="sp-title"><span>Mind</span><span>Grid</span></h1>' +
       '<p class="sp-tag">Train your brain. Raise your Puzzle IQ.</p><div class="sp-load"><i></i></div><p class="sp-tip"></p></div>');
@@ -445,7 +454,7 @@
     el.querySelector('.sp-tip').textContent = tips[Math.floor(Math.random() * tips.length)];
     document.body.appendChild(el);
     var done = false;
-    function end() { if (done) return; done = true; el.classList.add('out'); setTimeout(function () { el.remove(); }, 420); }
+    function end() { if (done) return; done = true; el.classList.add('out'); setTimeout(function () { el.remove(); splashEnded(); }, 420); }
     el.addEventListener('click', end);
     if (reduced) { el.classList.add('step2'); setTimeout(end, 900); return; }
     setTimeout(function () { el.classList.add('step2'); MG.sfx('whoosh'); }, 1300);
