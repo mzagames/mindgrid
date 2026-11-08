@@ -18,13 +18,11 @@
     const iqDelta = (() => { const h = iq.hist; if (h.length < 2 || h[h.length - 1].at !== today) return 0; return h[h.length - 1].v - h[h.length - 2].v; })();
     const next = iq.next;
     const modes = MG.ORDER.map((t) => {
-      const P = MG.puzzles[t], lv = MG.practiceLevel(t), d = MG.practiceDiff(lv);
-      const bounds = { easy: [1, 6], medium: [6, 16], hard: [16, 36], expert: [36, 36] }[d];
-      const pct = d === 'expert' ? 100 : Math.round(((lv - bounds[0]) / (bounds[1] - bounds[0])) * 100);
-      return `<a class="mode" style="--pc:${P.color}" href="play.html?mode=practice&type=${t}">
+      const P = MG.puzzles[t], lv = MG.practiceLevel(t), info = MG.levelInfo('practice', lv, t);
+      return `<a class="mode" style="--pc:${P.color}" href="play.html?mode=practice&type=${t}" title="Difficulty ${info.d} of 100, tuned to you">
         <div class="pic">${P.icon}</div><b>${P.name}</b>
-        <div class="lv"><span>Level ${lv}</span><em>${MG.DIFF_LABEL[d]}</em></div>
-        <div class="mbar"><i style="width:${pct}%"></i></div></a>`;
+        <div class="lv"><span>Level ${lv}</span><em>${MG.DIFF_LABEL[info.diff]}</em></div>
+        <div class="mbar"><i style="width:${Math.max(4, info.d)}%"></i></div></a>`;
     }).join('');
     const ms = MG.mixSpec(s.mix.level);
 

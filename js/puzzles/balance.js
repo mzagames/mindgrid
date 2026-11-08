@@ -43,9 +43,11 @@
   }
 
   /* Count solutions up to `limit`. With rng, branches randomly (used to build a random full grid). */
+  var work = 0; // search steps used; lets generate() cap its effort deterministically
   function solve(n, grid, limit, rng, out) {
     var count = 0;
     (function rec(g) {
+      work++;
       if (count >= limit || !propagate(n, g)) return;
       var e = g.indexOf(-1);
       if (e < 0) { count++; if (out) out.push(g.slice()); return; }
@@ -55,12 +57,40 @@
     return count;
   }
 
-  function generate(rng, diff) {
-    var cfg = CFG[diff] || CFG.medium, n = cfg[0], N = n * n, sols = [];
+  /** Difficulty dial: d 0..100 -> [even board size, share of cells given]. */
+  function cfgFor(d) {
+    var n = Math.max(6, Math.min(10, Math.round(MG.tierLerp(d, [6, 8, 10, 10]) / 2) * 2));
+    // floor of 0.12: stripping a 10x10 down to the bare minimum costs ~0.5 s on a phone for almost no extra challenge
+    return [n, Math.max(0.12, Math.min(0.55, MG.tierLerp(d, [0.5, 0.4, 0.34, 0.16])))];
+  }
+  /** How many times a solver must guess (branch) before finishing. 0 = pure step-by-step logic. */
+  function guesses(n, grid) {
+    var branches = 0, done = false;
+    (function rec(g) {
+      if (done || !propagate(n, g)) return;
+      var e = g.indexOf(-1);
+      if (e < 0) { done = true; return; }
+      branches++;
+      for (var k = 0; k < 2 && !done; k++) { var h = g.slice(); h[e] = k; rec(h); }
+    })(grid.slice());
+    return branches;
+  }
+  /** Quality gate: easy levels must need no guessing; hard ones should need some. */
+  function quality(P, d) {
+    var gs = guesses(P.n, P.givens);
+    return { ok: d == null ? true : d < 40 ? gs === 0 : d >= 70 ? gs >= 1 : true, effort: gs };
+  }
+
+  function generate(rng, diff, opt) {
+    var cfg = opt || CFG[diff] || CFG.medium, n = cfg[0], N = n * n, sols = [];
     solve(n, new Array(N).fill(-1), 1, rng, sols);
     var sol = sols[0], g = sol.slice(), givens = N, target = Math.ceil(N * cfg[1]);
     var order = rng.shuffle(Array.from({ length: N }, function (_, i) { return i; }));
-    for (var k = 0; k < N && givens > target; k++) {
+    // Adaptive levels (opt set) stop removing clues after a fixed amount of search work: same seed -> same puzzle,
+    // and no phone ever waits long. The classic Daily tiers keep the original unlimited behaviour.
+    var budget = opt ? 6000 : Infinity;
+    work = 0;
+    for (var k = 0; k < N && givens > target && work < budget; k++) {
       var c = order[k], v = g[c];
       g[c] = -1;
       if (solve(n, g, 2) !== 1) g[c] = v; else givens--;
@@ -155,7 +185,7 @@
       'Never three of the same symbol next to each other in a row or column.'
     ],
     controls: 'Tap an empty cell to cycle: sun → moon → empty. Right-click (desktop) cycles backwards. Bold cells are fixed.',
-    generate: generate, mount: mount,
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality,
     _check: solved, _count: function (P, g) { return solve(P.n, g, 2); }
   });
 })();

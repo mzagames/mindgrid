@@ -221,3 +221,25 @@ MindGrid/
 | Screen tours | First visit to Home, Journey, Daily, Archive, IQ, Settings, How to play and the play screen: the screen dims, one element is spotlighted, the hand taps it, with a short tip (Next / Skip). Stored as `seen["tour:<id>"]`; Settings → Replay tutorials resets them. |
 | Solved stamp | On a solve, a "Solved!/Perfect!" stamp with stars pops on the board before the win screen. |
 | Just completed | Back on the screen you came from, the finished item pops, its stars drop in, a badge and sparkles appear: Journey (road grows gold, YOU walks to the next level), Puzzle mode and Mix tiles (level bar fills), Daily cards (progress bar fills). |
+
+## 11. v1.5: the level director (endless levels tuned to each player)
+
+Journey, Puzzle modes and Mix Mode no longer use four fixed tiers. `js/levels.js` builds every level on the phone:
+
+1. **Difficulty dial (0-100).** Each puzzle has `cfgFor(d)` that maps d to generator settings (grid size, clue count, presses, givens). The classic tiers sit at d = 12/37/62/87, so settings and par times are interpolated between values already tuned (`MG.tierLerp`).
+2. **Target difficulty** = mode ramp (Journey 6 + 1.4/level, Puzzle modes 6 + 2.6/level, Mix 10 + 2.2/level), pulled toward the player's skill in that puzzle (up to 60% weight as solves accumulate), plus **form** (−20..+20: 3 fast stars push up, hints and slow solves pull down). Clamped to ramp −25 / +30 so nobody gets stuck or skipped ahead wildly.
+3. **Quality gate** (`quality(P, d)` per puzzle, using each puzzle's own solver):
+   - Blocks: exactly one tiling (new exact-cover solver); not mostly slivers.
+   - Crowns: exactly one solution.
+   - Balance: easy levels need zero guessing; hard ones need some.
+   - Pipes: most tiles start wrong, and the network branches.
+   - Link: the hidden path twists.
+   - Glow: enough lights on, and not trivially separable.
+
+   Up to 40 candidates are tried, within a ~160 ms budget; the first that passes is used.
+4. **No repeats**: a fingerprint of every served puzzle is stored (last 5,000); duplicates are skipped.
+5. **Stable levels**: the chosen candidate and d are saved per level (`levels[key]`), seeded with a per-install salt, so replay/resume rebuilds the same puzzle and different players get different puzzles.
+6. **Hand-picked intro**: Journey World 1 (levels 1-12) is the same gentle ramp for every new player, with each puzzle first at d = 0; candidates were picked with `MG._pickIntro()`.
+7. **No waiting**: the next level is built in the background while the win screen plays. Average build 2.6 ms, worst ~0.13 s (9×9 Crowns).
+
+The Daily challenge keeps the fixed tiers so everyone gets the same six puzzles.

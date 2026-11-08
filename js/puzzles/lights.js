@@ -13,8 +13,19 @@
     if (c < n - 1) state[i + 1] ^= 1;
   }
 
-  function generate(rng, diff) {
-    var cfg = SIZES[diff] || SIZES.medium, n = cfg[0], k = cfg[1], N = n * n, state, sol;
+  /** Difficulty dial: d 0..100 -> [grid size, presses hidden in the solution]. */
+  function cfgFor(d) {
+    var n = Math.max(3, Math.min(7, Math.round(MG.tierLerp(d, [3, 4, 5, 6]))));
+    return [n, Math.max(2, Math.min(Math.floor(n * n * 0.45), Math.round(MG.tierLerp(d, [3, 5, 8, 12]))))];
+  }
+  /** Quality gate: enough lights start on, and no trivially "press every lit light" boards. */
+  function quality(P) {
+    var on = P.start.reduce(function (a, v) { return a + v; }, 0), N = P.n * P.n;
+    return { ok: on >= Math.max(3, Math.ceil(N * 0.2)) && on !== P.par * 5, effort: P.par };
+  }
+
+  function generate(rng, diff, opt) {
+    var cfg = opt || SIZES[diff] || SIZES.medium, n = cfg[0], k = cfg[1], N = n * n, state, sol;
     do {
       state = new Array(N).fill(0); sol = new Array(N).fill(0);
       var cells = rng.shuffle(Array.from({ length: N }, function (_, i) { return i; })).slice(0, k);
@@ -77,7 +88,7 @@
       'Pressing a cell twice cancels out, so order never matters. Try to match par.'
     ],
     controls: 'Tap a cell to flip the plus-shape around it.',
-    generate: generate, mount: mount,
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality,
     _press: press
   });
 })();

@@ -5,7 +5,7 @@ var store = {};
 var ctx = {
   console: console, Date: Date,
   localStorage: { getItem: function (k) { return store[k] || null; }, setItem: function (k, v) { store[k] = v; } },
-  document: { documentElement: { setAttribute: function () {}, removeAttribute: function () {} } },
+  document: { documentElement: { setAttribute: function () {}, removeAttribute: function () {} }, addEventListener: function () {}, readyState: 'complete' },
   navigator: {}, location: { protocol: 'file:' }
 };
 ctx.window = ctx;

@@ -4,8 +4,62 @@
   var MG = window.MG;
   var SIZES = { easy: [5, 6], medium: [6, 8], hard: [8, 12], expert: [10, 16] };
 
-  function generate(rng, diff) {
-    var cfg = SIZES[diff] || SIZES.medium, n = cfg[0], maxA = cfg[1];
+  /** Difficulty dial: d 0..100 -> [grid size, largest rectangle]. */
+  function cfgFor(d) {
+    return [Math.max(4, Math.min(10, Math.round(MG.tierLerp(d, [5, 6, 8, 10])))), Math.max(4, Math.round(MG.tierLerp(d, [6, 8, 12, 16])))];
+  }
+
+  /** Count tilings (up to `limit`) with a small exact-cover search. Returns -1 if the node budget runs out. */
+  function countSolutions(P, limit, budget) {
+    var n = P.n, N = n * n, clues = [], cellC = [], i, k;
+    for (i = 0; i < N; i++) { cellC.push([]); if (P.clues[i]) clues.push(i); }
+    var isClue = P.clues.map(function (v) { return v > 0; });
+    clues.forEach(function (ci, ki) {
+      var v = P.clues[ci], cr = Math.floor(ci / n), cc = ci % n;
+      for (var w = 1; w <= v; w++) {
+        if (v % w) continue;
+        var h = v / w;
+        for (var r0 = cr - h + 1; r0 <= cr; r0++) for (var c0 = cc - w + 1; c0 <= cc; c0++) {
+          if (r0 < 0 || c0 < 0 || r0 + h > n || c0 + w > n) continue;
+          var cells = [], ok = true;
+          for (var y = r0; y < r0 + h && ok; y++) for (var x = c0; x < c0 + w; x++) {
+            var j = y * n + x; if (j !== ci && isClue[j]) { ok = false; break; } cells.push(j);
+          }
+          if (ok) cells.forEach(function (j) { cellC[j].push([ki, cells]); });
+        }
+      }
+    });
+    var cover = new Array(N).fill(false), used = new Array(clues.length).fill(false), count = 0, nodes = 0;
+    function rec(start) {
+      if (count >= limit || nodes > budget) return;
+      var e = start; while (e < N && cover[e]) e++;
+      if (e === N) { count++; return; }
+      var opts = cellC[e];
+      for (var o = 0; o < opts.length; o++) {
+        var ki = opts[o][0], cells = opts[o][1];
+        if (used[ki]) continue;
+        var free = true;
+        for (var q = 0; q < cells.length; q++) if (cover[cells[q]]) { free = false; break; }
+        if (!free) continue;
+        nodes++;
+        used[ki] = true; cells.forEach(function (j) { cover[j] = true; });
+        rec(e + 1);
+        used[ki] = false; cells.forEach(function (j) { cover[j] = false; });
+        if (count >= limit || nodes > budget) return;
+      }
+    }
+    rec(0);
+    P._nodes = nodes;
+    return nodes > budget ? -1 : count;
+  }
+  /** Quality gate: exactly one tiling, and not mostly 1x1/2-cell slivers. */
+  function quality(P) {
+    var c = countSolutions(P, 2, 60000), big = P.solution.filter(function (R) { return R.w * R.h >= 3; }).length;
+    return { ok: c === 1 && big >= P.solution.length * 0.35, effort: P._nodes || 0, unique: c === 1 };
+  }
+
+  function generate(rng, diff, opt) {
+    var cfg = opt || SIZES[diff] || SIZES.medium, n = cfg[0], maxA = cfg[1];
     var owner = new Array(n * n).fill(-1), rects = [];
     for (var i = 0; i < n * n; i++) {
       if (owner[i] !== -1) continue;
@@ -144,6 +198,7 @@
       'That number equals the rectangle’s area (width × height).'
     ],
     controls: 'Drag from one corner to the opposite corner to draw. Tap a rectangle to remove it.',
-    generate: generate, mount: mount, _check: function (P, rects) { return solved(P, rects); }
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality, _count: countSolutions,
+    _check: function (P, rects) { return solved(P, rects); }
   });
 })();

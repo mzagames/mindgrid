@@ -9,8 +9,21 @@
   function rotN(m, k) { k = ((k % 4) + 4) % 4; for (var i = 0; i < k; i++) m = rot(m); return m; }
   function bits(m) { return (m & 1) + ((m >> 1) & 1) + ((m >> 2) & 1) + ((m >> 3) & 1); }
 
-  function generate(rng, diff) {
-    var n = SIZES[diff] || SIZES.medium, N = n * n;
+  /** Difficulty dial: d 0..100 -> grid size. */
+  function cfgFor(d) { return Math.max(3, Math.min(9, Math.round(MG.tierLerp(d, [4, 5, 7, 8])))); }
+  /** Quality gate: most tiles must start turned the wrong way, and the network should branch. */
+  function quality(P) {
+    var N = P.n * P.n, wrong = 0, forks = 0;
+    for (var i = 0; i < N; i++) {
+      var t = P.tiles[i], s = P.solution[i];
+      if (t !== s && !(rotN(t, 2) === s && rotN(s, 2) === s)) wrong++;
+      if (bits(s) >= 3) forks++;
+    }
+    return { ok: wrong >= N * 0.6 && forks >= Math.max(1, Math.floor(N / 12)), effort: wrong + forks * 2 };
+  }
+
+  function generate(rng, diff, opt) {
+    var n = opt || SIZES[diff] || SIZES.medium, N = n * n;
     var mask = new Array(N).fill(0), inTree = new Array(N).fill(false);
     var src = Math.floor(n / 2) * n + Math.floor(n / 2), frontier = [];
     function addEdges(i) {
@@ -149,7 +162,7 @@
       'No pipe end may point at a wall or an unconnected side.'
     ],
     controls: 'Tap to rotate clockwise. Right-click (desktop) rotates the other way.',
-    generate: generate, mount: mount,
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality,
     _check: function (P, cur) { return check(P.n, P.src, cur).solved; }
   });
 })();

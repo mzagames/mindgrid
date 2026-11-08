@@ -670,3 +670,5 @@ a.day:active { transform: translateY(2px); box-shadow: none; }
 }
 .page-journey .world-map { margin-bottom: 70px; }
 .about img { height: 58px; background: #120c35; padding: 8px 14px; border-radius: 16px; box-sizing: content-box; }
+.tuned { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 13px; font-weight: 800; color: var(--muted); margin: -2px 0 10px; }
+.tuned .ico { width: 18px; height: 18px; color: var(--accent); flex: none; }

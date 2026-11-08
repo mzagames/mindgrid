@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.4.1';
+  MG.VERSION = '1.5.0';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -71,7 +71,8 @@
     return {
       settings: { theme: 'system', sound: true, haptics: true, timer: true, dailyDiff: 'medium', seen: {} },
       results: {}, progress: {}, journey: { level: 1 }, days: {}, log: [],
-      practice: {}, mix: { level: 1 }, stars: {}, iq: null
+      practice: {}, mix: { level: 1 }, stars: {}, iq: null,
+      form: {}, levels: {}, fps: [], salt: 0 // level director: per-puzzle form, generated levels, fingerprints, player seed
     };
   }
   var mem = null;
@@ -137,6 +138,15 @@
     crowns: [45, 90, 180, 300], lights: [25, 50, 100, 170], balance: [50, 100, 190, 320]
   };
   var DBASE = { easy: 92, medium: 104, hard: 116, expert: 128 };
+  /* Continuous difficulty d (0..100). The four classic tiers sit at d = 12 / 37 / 62 / 87, so every
+   * generator setting and par time is interpolated between values that were already tuned for those tiers. */
+  MG.TIER_D = { easy: 12, medium: 37, hard: 62, expert: 87 };
+  MG.tierLerp = function (d, v) {
+    var x = (d - 12) / 25, i = Math.max(0, Math.min(2, Math.floor(x)));
+    return v[i] + (v[i + 1] - v[i]) * (x - i); // extrapolates gently below 'easy' and above 'expert'
+  };
+  MG.dLabel = function (d) { return d < 25 ? 'easy' : d < 50 ? 'medium' : d < 75 ? 'hard' : 'expert'; };
+  MG.parFor = function (type, d) { return Math.max(12, Math.round(MG.tierLerp(d, MG.PAR[type] || MG.PAR.blocks))); };
   MG.RANKS = [[0, 'Rising Thinker'], [90, 'Curious Mind'], [100, 'Sharp Thinker'], [110, 'Quick Wit'],
     [120, 'Brilliant Mind'], [130, 'Genius'], [140, 'Mastermind'], [150, 'Grand Master']];
   MG.rankOf = function (iq) { var r = MG.RANKS[0]; MG.RANKS.forEach(function (x) { if (iq >= x[0]) r = x; }); return r[1]; };
@@ -145,11 +155,12 @@
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
   /** Performance of one solve: {score, stars, ratio, speed:'Lightning'|'Fast'|'Steady'|'Careful'}. */
-  MG.perf = function (type, diff, time, hints, undos, flow) {
-    var par = (MG.PAR[type] || MG.PAR.blocks)[Math.max(0, MG.DIFFS.indexOf(diff))];
+  MG.perf = function (type, diff, time, hints, undos, flow, d) {
+    if (d == null) d = MG.TIER_D[diff] != null ? MG.TIER_D[diff] : 37;
+    var par = MG.parFor(type, d);
     var ratio = time / par;
     var sp = ratio <= 0.4 ? 1 : ratio <= 1 ? 1 - (ratio - 0.4) / 0.6 : ratio >= 3 ? -1 : -(ratio - 1) / 2;
-    var score = DBASE[diff] + sp * 22 - Math.min(hints, 4) * 7 - Math.min(8, Math.max(0, (undos || 0) - 5) * 0.8) +
+    var score = 87.2 + d * 0.48 + sp * 22 - Math.min(hints, 4) * 7 - Math.min(8, Math.max(0, (undos || 0) - 5) * 0.8) +
       (hints ? 0 : Math.min(6, (flow || 0) * 1.5));
     var stars = !hints && ratio <= 1 ? 3 : hints <= 1 && ratio <= 2 ? 2 : 1;
     var speed = ratio <= 0.5 ? 'Lightning' : ratio <= 1 ? 'Fast' : ratio <= 2 ? 'Steady' : 'Careful';
@@ -197,16 +208,21 @@
     delete s.progress[key];
 
     var iq = s.iq, before = Math.round(iq.score), skillBefore = Math.round((iq.skills[info.type] || { score: 100 }).score);
-    var p = MG.perf(info.type, info.diff, info.time, info.hints, info.undos, iq.flow);
+    var p = MG.perf(info.type, info.diff, info.time, info.hints, info.undos, iq.flow, info.d);
     iq.flow = info.hints ? 0 : iq.flow + 1;
     applyIQ(iq, info.type, p, today);
+    // "form": how the player is doing on this puzzle right now. Feeds the level director (js/levels.js).
+    var fd = (p.stars === 3 ? (p.ratio < 0.6 ? 6 : 4) : p.stars === 2 ? 1 : -5) - Math.min(info.hints, 3) * 2;
+    var formBefore = s.form[info.type] || 0;
+    s.form[info.type] = clamp(Math.round(formBefore * 0.8 + fd), -20, 20);
     var starsBefore = s.stars[key] || 0;
     if (p.stars > starsBefore) s.stars[key] = p.stars;
     MG.save();
     return {
       newBest: !!prev && info.time < prev.time, prev: prev, perf: p, stars: p.stars, starsBefore: starsBefore,
       iqBefore: before, iqAfter: Math.round(iq.score), calibrating: iq.n < 3, iqN: iq.n,
-      skillBefore: skillBefore, skillAfter: Math.round(iq.skills[info.type].score), flow: iq.flow
+      skillBefore: skillBefore, skillAfter: Math.round(iq.skills[info.type].score), flow: iq.flow,
+      formDelta: s.form[info.type] - formBefore
     };
   };
 

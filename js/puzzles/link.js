@@ -28,8 +28,24 @@
     return p;
   }
 
-  function generate(rng, diff) {
-    var cfg = SIZES[diff] || SIZES.medium, n = cfg[0], K = cfg[1];
+  /** Difficulty dial: d 0..100 -> [grid size, number of clues]. Fewer clues per cell = harder. */
+  function cfgFor(d) {
+    var n = Math.max(4, Math.min(9, Math.round(MG.tierLerp(d, [5, 6, 7, 8]))));
+    return [n, Math.max(4, Math.round(MG.tierLerp(d, [8, 9, 10, 11]) + (n > 8 ? 1 : 0)))];
+  }
+  /** Quality gate: the hidden path should twist (long straight runs make it trivial). */
+  function quality(P) {
+    var p = P.solution, n = P.n, turns = 0;
+    for (var i = 1; i + 1 < p.length; i++) {
+      var d1 = p[i] - p[i - 1], d2 = p[i + 1] - p[i];
+      if (d1 !== d2) turns++;
+    }
+    var ratio = turns / Math.max(1, p.length - 2);
+    return { ok: ratio >= (n <= 5 ? 0.3 : 0.4), effort: turns };
+  }
+
+  function generate(rng, diff, opt) {
+    var cfg = opt || SIZES[diff] || SIZES.medium, n = cfg[0], K = cfg[1];
     var path = hamPath(rng, n), last = path.length - 1, seg = last / (K - 1), idx = [0];
     for (var j = 1; j < K - 1; j++) {
       var v = Math.round(j * seg + (rng.next() - 0.5) * seg * 0.7);
@@ -161,6 +177,6 @@
       'The path must fill every cell exactly once and only moves up, down, left or right.'
     ],
     controls: 'Press on 1 and drag. Drag back over your line, or press any earlier cell, to backtrack.',
-    generate: generate, mount: mount, _check: validPath
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality, _check: validPath
   });
 })();

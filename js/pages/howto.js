@@ -19,6 +19,7 @@
       <div class="row"><div class="lbl">Journey<small>A world map of endless levels that cycles through every puzzle. A new themed world every 12 levels.</small></div></div>
       <div class="row"><div class="lbl">Puzzle modes<small>Pick one puzzle (Blocks, Pipes, Link, Crowns, Glow or Balance) and climb its own levels from Easy to Expert.</small></div></div>
       <div class="row"><div class="lbl">Mix Mode<small>A surprise puzzle every level, never the same one twice in a row. Difficulty climbs faster.</small></div></div>
+      <div class="row"><div class="lbl">Levels tuned to you<small>Journey, Puzzle modes and Mix never run out and never repeat. Each new level is built on your phone for you: solve fast without hints and they get harder, struggle and they ease off. Every puzzle is checked by a solver before you see it.</small></div></div>
       <div class="row"><div class="lbl">Daily challenge<small>Six new puzzles every day, the same for everyone. Solve one to keep your streak. Replay old days in the Archive.</small></div></div>
       <div class="row"><div class="lbl">Stars<small>3 stars: no hints and within par time. 2 stars: at most one hint and within twice the par. 1 star: solved.</small></div></div>
       <div class="row"><div class="lbl">Puzzle IQ<small>A for-fun score from your speed, the difficulty, hints and undos. It moves toward how you play now. Not a clinical IQ test.</small></div></div>

@@ -100,8 +100,13 @@
     return countSolutions(n, reg, 2) === 1;
   }
 
-  function generate(rng, diff) {
-    var n = SIZES[diff] || SIZES.medium, best = null;
+  /** Difficulty dial: d 0..100 -> board size. */
+  function cfgFor(d) { return Math.max(5, Math.min(9, Math.round(MG.tierLerp(d, [5, 6, 8, 9])))); }
+  /** Quality gate: exactly one solution. */
+  function quality(P) { return { ok: !!P.unique, effort: P.n }; }
+
+  function generate(rng, diff, opt) {
+    var n = opt || SIZES[diff] || SIZES.medium, best = null;
     for (var a = 0; a < 12; a++) {
       var cols = placeCrowns(rng, n), reg = growRegions(rng, n, cols);
       var unique = refine(rng, n, reg, cols, n * 12);
@@ -212,7 +217,7 @@
       'Use × marks to note cells that cannot hold a crown.'
     ],
     controls: 'Tap a cell to cycle: empty → × → crown. Drag across empty cells to paint × marks.',
-    generate: generate, mount: mount,
+    generate: generate, mount: mount, cfgFor: cfgFor, quality: quality,
     _check: solved, _count: countSolutions
   });
 })();

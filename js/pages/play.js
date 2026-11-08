@@ -5,28 +5,20 @@
   const MG = window.MG, app = document.getElementById('app'), q = new URLSearchParams(location.search), today = MG.today();
   const mode = ['journey', 'practice', 'mix'].indexOf(q.get('mode')) >= 0 ? q.get('mode') : 'daily';
   const s0 = MG.load();
-  let type, diff, key, day = null, level = 0, backHref, meta;
+  let type, diff, key, day = null, level = 0, backHref, meta, d = null, puzzle = null, lv = null;
   const lvlParam = (max) => Math.max(1, Math.min(max, parseInt(q.get('level'), 10) || max));
 
-  if (mode === 'journey') {
-    level = lvlParam(s0.journey.level);
-    ({ type, diff } = MG.journeySpec(level));
-    key = MG.journeyKey(level);
-    backHref = 'journey.html';
-    meta = 'Journey · Level ' + level + ' · ' + MG.DIFF_LABEL[diff];
-  } else if (mode === 'practice') {
-    type = MG.puzzles[q.get('type')] ? q.get('type') : MG.ORDER[0];
-    level = lvlParam(MG.practiceLevel(type));
-    diff = MG.practiceDiff(level);
-    key = MG.practiceKey(type, level);
-    backHref = 'index.html';
-    meta = 'Level ' + level + ' · ' + MG.DIFF_LABEL[diff];
-  } else if (mode === 'mix') {
-    level = lvlParam(s0.mix.level);
-    ({ type, diff } = MG.mixSpec(level));
-    key = MG.mixKey(level);
-    backHref = 'index.html';
-    meta = 'Mix · Level ' + level + ' · ' + MG.DIFF_LABEL[diff];
+  if (mode !== 'daily') {
+    // Journey, Puzzle modes and Mix: the level director builds (or reloads) a level tuned to this player.
+    if (mode === 'journey') level = lvlParam(s0.journey.level);
+    else if (mode === 'mix') level = lvlParam(s0.mix.level);
+    else { type = MG.puzzles[q.get('type')] ? q.get('type') : MG.ORDER[0]; level = lvlParam(MG.practiceLevel(type)); }
+    lv = MG.level(mode, level, type);
+    ({ type, key, d, diff, puzzle } = lv);
+    if (lv.fresh) MG.clearProgress(key); // a save from the old fixed generator would not match the new puzzle
+    backHref = mode === 'journey' ? 'journey.html' : 'index.html';
+    meta = (mode === 'journey' ? 'Journey · ' : mode === 'mix' ? 'Mix · ' : '') + 'Level ' + level + ' · ' + MG.DIFF_LABEL[diff] +
+      (lv.intro ? '' : ' · tuned to you');
   } else {
     day = q.get('date');
     if (!MG.isValidDate(day) || day > today || day < MG.earliestDay()) day = today;
@@ -38,10 +30,11 @@
   }
 
   const P = MG.puzzles[type];
-  const par = MG.PAR[type][MG.DIFFS.indexOf(diff)];
+  if (d == null) d = MG.TIER_D[diff];
+  const par = MG.parFor(type, d);
   document.title = P.name + ' · MindGrid';
   document.body.style.setProperty('--pc', P.color);
-  const puzzle = P.generate(MG.rng(MG.seedFor(key)), diff);
+  if (!puzzle) puzzle = P.generate(MG.rng(MG.seedFor(key)), diff); // Daily: the same puzzle for everyone
 
   app.innerHTML = `
     <header class="playbar">
@@ -161,7 +154,8 @@
     tick();
     solved = true; running = false;
     const time = Math.max(1, Math.round(elapsed));
-    const out = MG.recordResult(key, { type: type, diff: diff, mode: mode, day: day, level: level, time: time, hints: hints, undos: undos });
+    const out = MG.recordResult(key, { type: type, diff: diff, d: d, mode: mode, day: day, level: level, time: time, hints: hints, undos: undos });
+    if (mode !== 'daily') MG.prepareLevel(mode, level + 1, type); // build the next level while the win screen plays
     const best = MG.getResult(key);
     if (MG.adsSolved) MG.adsSolved();
     stage.querySelector('.board').classList.add('solved');
@@ -197,6 +191,7 @@
         ${iqHtml}
         ${rankUp ? `<div class="levelup">${MG.icon('trophy')} New rank: ${MG.rankOf(out.iqAfter)}</div>` : ''}
         ${out.flow >= 3 ? `<div class="flowtag">🔥 ${out.flow} in a row without hints</div>` : ''}
+        ${mode !== 'daily' && !lv.intro ? `<div class="tuned">${MG.icon('brain')} ${out.formDelta > 0 ? 'Great pace! Your next levels get a bit harder.' : out.formDelta < 0 ? 'Next levels ease off a little so you can build momentum.' : 'Your next levels stay at this challenge.'}</div>` : ''}
         <div class="statrow">
           <div><b>${MG.fmtTime(best.time)}</b><span>Best</span></div>
           <div><b>${hints}</b><span>Hints</span></div>
