@@ -13,7 +13,7 @@ level journey, a free archive, streaks and stats. No accounts, and it works offl
 | 🤖 **Android beta (Google Play)** | https://play.google.com/apps/testing/com.mzagaming.mindgrid |
 | 🛍️ **MZA Gaming store** | https://mzagames.github.io/#mindgrid |
 | 🔒 **Privacy policy** | https://mzagames.github.io/mindgrid/privacy.html |
-| ✉️ **Support** | mzagamingsupport@gmail.com |
+| ✉️ **Support** | mzagames@proton.me |
 
 The Android app (`com.mzagaming.mindgrid`) is in closed testing on Google Play. To join, become a tester through the
 link above with the Google account that's on our tester list or in the App Hive group.
