@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.5.0';
+  MG.VERSION = '1.5.1';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -551,6 +551,81 @@
   /* ---------- App start ---------- */
   document.addEventListener('DOMContentLoaded', function () {
     if (/page-(home|daily|journey|archive|stats|settings|howto)/.test(document.body.className)) MG.splash();
+  });
+
+  /* ---------- Android app: "update available" pop-up and "Leaving already?" on Back ----------
+   * Uses @capacitor/app (Back button, exit) and @capawesome/capacitor-app-update (Google Play in-app updates).
+   * In a normal browser there is no Capacitor bridge, so none of this runs. */
+  MG.EXIT_TIPS = ['Solve without hints to earn all 3 stars.', 'Faster solves raise your Puzzle IQ.',
+    'Mix Mode gives you a different puzzle every level.', 'Play the daily puzzle to keep your streak alive.',
+    'Missed a day? The archive keeps every daily puzzle from the past year.', 'Each Journey level gets a little harder than the last.',
+    'Your Puzzle IQ is on the IQ tab. See how it grows.'];
+  MG.exitPrompt = function (onExit) {
+    if (document.querySelector('.modal-back.exit-ask')) return null;
+    var tip = MG.EXIT_TIPS[Math.floor(Math.random() * MG.EXIT_TIPS.length)];
+    var m = MG.modal('<h3>Leaving already?</h3><p class="muted">Your progress is saved.</p>' +
+      '<p class="ctl"><b>Tip:</b> ' + MG.esc(tip) + '</p>' +
+      '<button type="button" class="btn" data-act="stay">Keep playing</button>' +
+      '<button type="button" class="btn ghost" data-act="exit">Exit game</button>');
+    m.el.parentNode.classList.add('exit-ask');
+    m.el.querySelector('[data-act=stay]').addEventListener('click', m.close);
+    m.el.querySelector('[data-act=exit]').addEventListener('click', function () { m.close(); if (onExit) onExit(); });
+    return m;
+  };
+  MG.updatePrompt = function (onUpdate) {
+    var m = MG.modal('<h3>Update available</h3><p class="muted">A new version of MindGrid is ready on Google Play with the latest ' +
+      'fixes and improvements. Your progress stays saved.</p>' +
+      '<button type="button" class="btn" data-act="update">Update now</button>' +
+      '<button type="button" class="btn ghost" data-act="cancel">Cancel</button>');
+    m.el.querySelector('[data-act=cancel]').addEventListener('click', m.close);
+    m.el.querySelector('[data-act=update]').addEventListener('click', function () { m.close(); if (onUpdate) onUpdate(); });
+    return m;
+  };
+  document.addEventListener('DOMContentLoaded', function nativeShell() {
+    var Cap = window.Capacitor;
+    if (!Cap || typeof Cap.isNativePlatform !== 'function' || !Cap.isNativePlatform() || !Cap.Plugins) return;
+    var App = Cap.Plugins.App, Upd = Cap.Plugins.AppUpdate;
+    var home = document.body.classList.contains('page-home');
+    // Splash, pop-ups, first-visit tours (.cm) and how-to-play demos all count as "something on screen".
+    function busy() { return !!document.querySelector('.splash, .modal-back:not(.out), .cm:not(.out)'); }
+
+    if (App && App.addListener) {
+      App.addListener('backButton', function (ev) {
+        var splash = document.querySelector('.splash');
+        if (splash) { splash.click(); return; }
+        var tour = document.querySelector('.cm:not(.out)');
+        if (tour) { var skip = tour.querySelector('.cm-skip') || tour.querySelector('.cm-next'); if (skip) skip.click(); return; }
+        var open = document.querySelectorAll('.modal-back:not(.out)');
+        if (open.length) { var top = open[open.length - 1]; top.dispatchEvent(new MouseEvent('click', { bubbles: true })); return; }
+        if (!home) { if (ev && ev.canGoBack) history.back(); else location.href = 'index.html'; return; }
+        MG.exitPrompt(function () { App.exitApp(); });
+      });
+    }
+
+    // Once per app session, on Home, after the splash and never on top of another pop-up.
+    if (!Upd || !home) return;
+    var asked = false;
+    try { asked = sessionStorage.getItem('mindgrid.update') === '1'; } catch (e) { /* ignore */ }
+    if (asked) return;
+    function start() {
+      Upd.getAppUpdateInfo().then(function (info) {
+        if (!info) return;
+        // 2 = update available, 3 = an update the player already started (resume it).
+        if (info.updateAvailability === 3) { Upd.performImmediateUpdate().catch(function () {}); return; }
+        if (info.updateAvailability !== 2) return;
+        var tries = 0;
+        (function offer() {
+          if (busy()) { if (++tries < 20) setTimeout(offer, 3000); return; }
+          try { sessionStorage.setItem('mindgrid.update', '1'); } catch (e) { /* ignore */ }
+          MG.updatePrompt(function () {
+            // Google Play's full-screen update; if Play can't run it here, open the MindGrid store page instead.
+            var run = info.immediateUpdateAllowed ? Upd.performImmediateUpdate() : Promise.reject(new Error('store'));
+            run.catch(function () { return Upd.openAppStore(); }).catch(function () {});
+          });
+        })();
+      }).catch(function () { /* not installed from Google Play, or offline */ });
+    }
+    MG.afterSplash(function () { setTimeout(start, 1200); });
   });
 
   /* ---------- Offline (service worker) ---------- */

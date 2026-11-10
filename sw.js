@@ -1,5 +1,5 @@
 /* MindGrid service worker: network-first (always fresh when online), cache fallback (works offline). */
-const CACHE = 'mindgrid-v1.5.0';
+const CACHE = 'mindgrid-v1.5.1';
 const FILES = [
   './', 'index.html', 'daily.html', 'play.html', 'journey.html', 'archive.html', 'stats.html', 'settings.html', 'howto.html', 'privacy.html',
   'manifest.webmanifest', 'assets/icon.svg', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/mza-games-logo.png', 'css/style.css', 'css/tutorial.css', 'js/core.js', 'js/tutorial.js',
