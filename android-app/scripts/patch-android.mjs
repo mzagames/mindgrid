@@ -1,6 +1,7 @@
-// Patches the generated Capacitor Android project: AdMob app ID, version code/name. Prints the SDK levels.
+// Patches the generated Capacitor Android project: AdMob app ID, version code/name, and (1.6.0) the
+// MzaBilling plugin for the one-time "Remove ads" purchase (Google Play Billing). Prints the SDK levels.
 // Env: VERSION_CODE (integer), VERSION_NAME (string), ADMOB_APP_ID (optional override)
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +30,31 @@ const gradle = edit('app/build.gradle', (g) => g
   .replace(/versionCode\s+\d+/, `versionCode ${versionCode}`)
   .replace(/versionName\s+"[^"]*"/, `versionName "${versionName}"`));
 if (!gradle.includes(`versionCode ${versionCode}`)) throw new Error('Could not set versionCode in app/build.gradle');
+
+// ---- 1.6.0: "Remove ads" purchase. The plugin source lives in android-app/native and is copied in here.
+const javaDir = join(android, 'app', 'src', 'main', 'java', 'com', 'mzagaming', 'mindgrid');
+mkdirSync(javaDir, { recursive: true });
+copyFileSync(join(here, '..', 'native', 'MzaBillingPlugin.java'), join(javaDir, 'MzaBillingPlugin.java'));
+console.log('copied MzaBillingPlugin.java');
+const activity = edit('app/src/main/java/com/mzagaming/mindgrid/MainActivity.java', (m) => {
+  if (m.includes('MzaBillingPlugin')) return m;
+  const body = [
+    'public class MainActivity extends BridgeActivity {',
+    '    @Override',
+    '    public void onCreate(Bundle savedInstanceState) {',
+    '        registerPlugin(MzaBillingPlugin.class); // local plugin: must be registered before super.onCreate',
+    '        super.onCreate(savedInstanceState);',
+    '    }',
+    ''].join('\n');
+  let out = m.replace(/public class MainActivity extends BridgeActivity\s*\{\s*\}/, body + '}');
+  if (out === m) out = m.replace(/public class MainActivity extends BridgeActivity\s*\{/, body);
+  if (!out.includes('import android.os.Bundle;')) out = out.replace(/(package [^;]+;)/, '$1\n\nimport android.os.Bundle;');
+  return out;
+});
+if (!activity.includes('registerPlugin(MzaBillingPlugin.class)')) throw new Error('Could not register MzaBillingPlugin in MainActivity');
+const appGradle = edit('app/build.gradle', (g) => g.includes('com.android.billingclient:billing') ? g :
+  g.replace(/dependencies\s*\{/, "dependencies {\n    implementation 'com.android.billingclient:billing:9.1.0'"));
+if (!appGradle.includes('com.android.billingclient:billing:9.1.0')) throw new Error('Could not add Google Play Billing to app/build.gradle');
 
 const vars = readFileSync(join(android, 'variables.gradle'), 'utf8');
 console.log('SDK levels:', (vars.match(/(minSdkVersion|compileSdkVersion|targetSdkVersion)\s*=\s*\d+/g) || []).join(', '));

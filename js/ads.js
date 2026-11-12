@@ -3,6 +3,7 @@
  * - Interstitial: only BETWEEN levels, after a solve, when the player taps Next/Back on the win screen.
  *   Frequency-capped: at most once every `everySolves` solves and `minGapMs` apart.
  * - Consent: Google UMP form for EEA/UK players before ads are requested.
+ * - Remove ads (1.6.0, js/billing.js): once owned, no banner, no interstitial and no ad break at all.
  * In a normal browser (the web version) there is no Capacitor bridge, so this file does nothing. */
 (function () {
   'use strict';
@@ -18,6 +19,7 @@
   var BANNER_PAGES = ['page-home', 'page-daily', 'page-journey', 'page-archive', 'page-stats'];
   var Cap = window.Capacitor;
   var AdMob = Cap && typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform() && Cap.Plugins ? Cap.Plugins.AdMob : null;
+  function adFree() { return !!(MG.removeAds && MG.removeAds.owned()); }
   MG.adsAvailable = !!AdMob;
 
   var KEY = 'mindgrid.ads';
@@ -87,6 +89,7 @@
       .catch(function () { busy = false; failed(); });
   }
   function showBanner() {
+    if (adFree()) { hideBanner(); return; }
     wantBanner = true;
     if (bs.state !== 'none' && bs.h) setAdHeight(bs.h); // keep layout stable while it comes back
     init().then(function (ok) {
@@ -114,7 +117,7 @@
   function dueSoon() { return state.solves + 1 >= CFG.everySolves; }
   function due() { return state.solves >= CFG.everySolves && Date.now() - state.last >= CFG.minGapMs; }
   function prepareInterstitial() {
-    if (!AdMob || interstitialLoaded) return;
+    if (!AdMob || interstitialLoaded || adFree()) return;
     init().then(function (ok) {
       if (!ok) return;
       AdMob.prepareInterstitial({ adId: CFG.interstitial, isTesting: CFG.testing })
@@ -131,7 +134,7 @@
 
   /** Between levels: maybe show an interstitial, then run `go` (navigation) when it closes. */
   MG.adsBetweenLevels = function (go) {
-    if (!AdMob || !interstitialLoaded || !due()) { go(); return; }
+    if (!AdMob || adFree() || !interstitialLoaded || !due()) { go(); return; }
     var finished = false;
     var handles = [];
     function finish() {
@@ -168,5 +171,11 @@
       if (/page-play/.test(cls) && dueSoon()) prepareInterstitial();
     };
     if (document.body) onPage(); else document.addEventListener('DOMContentLoaded', onPage);
+    // Bought or restored: the banner goes at once. A refund brings ads back on the next menu screen.
+    if (MG.removeAds) MG.removeAds.onChange(function (st, changed) {
+      if (!changed) return;
+      if (st.owned) { hideBanner(); interstitialLoaded = false; AdMob.removeBanner().catch(function () {}); bs.state = 'none'; saveBs(); }
+      else if (document.body) onPage();
+    });
   }
 })();
