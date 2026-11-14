@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.6.0';
+  MG.VERSION = '1.6.1';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -626,6 +626,46 @@
       }).catch(function () { /* not installed from Google Play, or offline */ });
     }
     MG.afterSplash(function () { setTimeout(start, 1200); });
+  });
+
+  /* ---------- App Hive tester countdown (Android app only) ----------
+   * Once per app session: a pill near the top counts down 30 s, then shows
+   * "Test complete — take a screenshot now" with the date and time for 15 s.
+   * It never takes touches. The start time sits in sessionStorage, so the
+   * countdown carries on across pages (each page is its own document). */
+  MG.testerCountdown = function () {
+    var KEY = 'mindgrid.apphive', COUNT = 30, PROOF = 15, start = 0;
+    try { start = +sessionStorage.getItem(KEY) || 0; } catch (e) { /* ignore */ }
+    if (!start) { start = Date.now(); try { sessionStorage.setItem(KEY, String(start)); } catch (e) { /* ignore */ } }
+    if (Date.now() - start >= (COUNT + PROOF) * 1000) return;
+    var pill = document.createElement('div');
+    pill.setAttribute('aria-hidden', 'true');
+    pill.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top, 0px) + 12px);transform:translateX(-50%);' +
+      'z-index:2147483647;pointer-events:none;background:rgba(34,32,52,.92);color:#fff;border:1.5px solid #FFD34D;' +
+      'border-radius:999px;padding:8px 16px;font:600 14px/1.35 system-ui,sans-serif;text-align:center;white-space:pre-line;' +
+      'box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:calc(100vw - 32px)';
+    document.body.appendChild(pill);
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function tick() {
+      var gone = Math.floor((Date.now() - start) / 1000);
+      if (gone >= COUNT + PROOF) { pill.remove(); return; }
+      if (gone < COUNT) {
+        var left = COUNT - gone;
+        pill.textContent = 'App Hive test: keep open ' + Math.floor(left / 60) + ':' + two(left % 60);
+      } else {
+        var d = new Date(start + COUNT * 1000);
+        pill.style.background = 'rgba(30,122,70,.95)';
+        pill.textContent = '\u2713 Test complete \u2014 take a screenshot now\n' + d.getDate() + ' ' + M[d.getMonth()] + ' ' +
+          d.getFullYear() + ', ' + two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds());
+      }
+      setTimeout(tick, 1000 - ((Date.now() - start) % 1000) + 20);
+    }
+    tick();
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    var Cap = window.Capacitor;
+    if (Cap && typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform()) MG.testerCountdown();
   });
 
   /* ---------- Offline (service worker) ---------- */
