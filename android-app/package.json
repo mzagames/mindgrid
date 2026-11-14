@@ -1,7 +1,7 @@
 {
   "name": "mindgrid-android",
   "private": true,
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Native Android shell (Capacitor) for MindGrid with Google AdMob ads, a one-time Remove ads purchase (Play Billing), Play in-app updates and a Back-button exit question. Built by .github/workflows/android.yml.",
   "type": "module",
   "scripts": {

@@ -56,6 +56,17 @@ const appGradle = edit('app/build.gradle', (g) => g.includes('com.android.billin
   g.replace(/dependencies\s*\{/, "dependencies {\n    implementation 'com.android.billingclient:billing:9.1.0'"));
 if (!appGradle.includes('com.android.billingclient:billing:9.1.0')) throw new Error('Could not add Google Play Billing to app/build.gradle');
 
+// ---- 1.6.2: App Hive tester countdown. MzaSecure blocks screenshots for the first seconds and reports
+// screenshot attempts on Android 14+ (DETECT_SCREEN_CAPTURE is a normal install-time permission).
+copyFileSync(join(here, '..', 'native', 'MzaSecurePlugin.java'), join(javaDir, 'MzaSecurePlugin.java'));
+console.log('copied MzaSecurePlugin.java');
+const activity2 = edit('app/src/main/java/com/mzagaming/mindgrid/MainActivity.java', (m) => m.includes('MzaSecurePlugin') ? m :
+  m.replace('registerPlugin(MzaBillingPlugin.class);', 'registerPlugin(MzaSecurePlugin.class);\n        registerPlugin(MzaBillingPlugin.class);'));
+if (!activity2.includes('registerPlugin(MzaSecurePlugin.class)')) throw new Error('Could not register MzaSecurePlugin in MainActivity');
+const manifest = edit('app/src/main/AndroidManifest.xml', (m) => m.includes('DETECT_SCREEN_CAPTURE') ? m :
+  m.replace(/(<application)/, '<uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />\n    $1'));
+if (!manifest.includes('DETECT_SCREEN_CAPTURE')) throw new Error('Could not add DETECT_SCREEN_CAPTURE');
+
 const vars = readFileSync(join(android, 'variables.gradle'), 'utf8');
 console.log('SDK levels:', (vars.match(/(minSdkVersion|compileSdkVersion|targetSdkVersion)\s*=\s*\d+/g) || []).join(', '));
 console.log(`Version ${versionName} (${versionCode}), AdMob app ${appId}`);

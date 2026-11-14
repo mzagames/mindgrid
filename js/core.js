@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.6.1';
+  MG.VERSION = '1.6.2';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -647,19 +647,36 @@
     document.body.appendChild(pill);
     function two(n) { return (n < 10 ? '0' : '') + n; }
     var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    function tick() {
-      var gone = Math.floor((Date.now() - start) / 1000);
+    // 1.6.2: no screenshots in the first LOCK seconds (Android FLAG_SECURE via the MzaSecure plugin).
+    // A screenshot attempt (Android 14+) turns the pill red with the real seconds still to wait.
+    var LOCK = 15, Sec = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MzaSecure;
+    var locked = false, warnUntil = 0;
+    function secure(on) {
+      if (locked === on) return;
+      locked = on;
+      if (Sec && Sec.setSecure) Sec.setSecure({ on: on }).catch(function () {});
+    }
+    if (Sec && Sec.addListener) Sec.addListener('screenshot', function () {
+      if (Date.now() - start < LOCK * 1000) { warnUntil = Date.now() + 4000; tick(true); }
+    });
+    function tick(once) {
+      var ms = Date.now() - start, gone = Math.floor(ms / 1000);
+      secure(ms < LOCK * 1000);
       if (gone >= COUNT + PROOF) { pill.remove(); return; }
       if (gone < COUNT) {
-        var left = COUNT - gone;
-        pill.textContent = 'App Hive test: keep open ' + Math.floor(left / 60) + ':' + two(left % 60);
+        var left = COUNT - gone, wait = LOCK - gone;
+        var warn = wait > 0 && Date.now() < warnUntil;
+        pill.style.background = warn ? 'rgba(178,34,34,.95)' : 'rgba(34,32,52,.92)';
+        pill.textContent = warn ? 'Screenshot blocked — wait ' + wait + ' more second' + (wait === 1 ? '' : 's') :
+          'App Hive test: keep open ' + Math.floor(left / 60) + ':' + two(left % 60) +
+          (wait > 0 ? '\nScreenshots allowed in ' + wait + ' s' : '');
       } else {
         var d = new Date(start + COUNT * 1000);
         pill.style.background = 'rgba(30,122,70,.95)';
         pill.textContent = '\u2713 Test complete \u2014 take a screenshot now\n' + d.getDate() + ' ' + M[d.getMonth()] + ' ' +
           d.getFullYear() + ', ' + two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds());
       }
-      setTimeout(tick, 1000 - ((Date.now() - start) % 1000) + 20);
+      if (!once) setTimeout(tick, 1000 - ((Date.now() - start) % 1000) + 20);
     }
     tick();
   };
