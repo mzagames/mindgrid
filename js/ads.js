@@ -31,7 +31,8 @@
   function init() {
     if (!AdMob) return Promise.resolve(false);
     if (ready) return ready;
-    ready = AdMob.initialize({})
+    // PG cap matches the AdMob account setting (no T or MA ads)
+    ready = AdMob.initialize({ maxAdContentRating: 'ParentalGuidance' })
       .then(function () { return AdMob.requestConsentInfo(); })
       .then(function (info) {
         if (info && info.isConsentFormAvailable && info.status === 'REQUIRED') {
