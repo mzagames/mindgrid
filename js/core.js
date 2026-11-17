@@ -685,9 +685,5 @@
     if (Cap && typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform()) MG.testerCountdown();
   });
 
-  /* ---------- Offline (service worker) ---------- */
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) &&
-      !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
-    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
-  }
+  /* The web build is retired (the game ships on Google Play), so no service worker is registered. */
 })();

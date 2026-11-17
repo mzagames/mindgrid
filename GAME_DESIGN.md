@@ -131,7 +131,7 @@ Navigation: a bottom tab bar (Today · Journey · Archive · Stats · Settings).
 - **Adaptive banner** at the bottom of the menu screens (Today, Journey, Archive, Stats). The tab bar moves up above it.
   There is no banner on the puzzle, settings, how-to or privacy screens.
 - **Consent:** the Google UMP form is shown to EEA/UK users before ads load, and Settings → *Ad privacy choices* reopens it.
-- The **web version has no ads** (`js/ads.js` does nothing without the native bridge).
+- The web build (development only) has no ads: `js/ads.js` does nothing without the native bridge.
 - The native app is built in CI: `.github/workflows/android.yml` with `android-app/` (Capacitor 8).
 
 ---

@@ -1,7 +1,9 @@
 # MindGrid: Daily Logic Puzzles
 
 A calm, minimalist **brain-training game** with six original logic puzzles. There's a new set every day, an endless
-level journey, a free archive, streaks and stats. No accounts, and it works offline. The web version is ad-free; the Android app is supported by AdMob ads between levels.
+level journey, a free archive, streaks and stats. No accounts, and it works offline. MindGrid is an Android app on Google Play, supported by AdMob ads between levels
+with a one-time Remove ads purchase. The web build in this repo is for development only: the public site sends
+visitors to the game's page instead of playing it in the browser.
 
 > Built by **MZA Games**. It's in the same genre as daily-puzzle apps such as Voodoo's *The Almanac*. The
 > research notes and full design are in [GAME_DESIGN.md](GAME_DESIGN.md). All code, art, puzzle generators and
@@ -9,9 +11,9 @@ level journey, a free archive, streaks and stats. No accounts, and it works offl
 
 | | Link |
 |---|---|
-| ▶ **Play in your browser** | https://mzagames.github.io/mindgrid/ |
-| 🤖 **Android beta (Google Play)** | https://play.google.com/apps/testing/com.mzagaming.mindgrid |
-| 🛍️ **MZA Gaming store** | https://mzagames.github.io/#mindgrid |
+| ▶ **Get it on Google Play** | https://play.google.com/store/apps/details?id=com.mzagaming.mindgrid |
+| 🤖 **Join early access (testers)** | https://play.google.com/apps/testing/com.mzagaming.mindgrid |
+| 🛍️ **Game page** | https://mzagames.github.io/games/mindgrid/ |
 | 🔒 **Privacy policy** | https://mzagames.github.io/mindgrid/privacy.html |
 | ✉️ **Support** | mzagames@proton.me |
 
