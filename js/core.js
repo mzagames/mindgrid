@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.6.2';
+  MG.VERSION = '1.7.0';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
@@ -626,63 +626,6 @@
       }).catch(function () { /* not installed from Google Play, or offline */ });
     }
     MG.afterSplash(function () { setTimeout(start, 1200); });
-  });
-
-  /* ---------- App Hive tester countdown (Android app only) ----------
-   * Once per app session: a pill near the top counts down 30 s, then shows
-   * "Test complete — take a screenshot now" with the date and time for 15 s.
-   * It never takes touches. The start time sits in sessionStorage, so the
-   * countdown carries on across pages (each page is its own document). */
-  MG.testerCountdown = function () {
-    var KEY = 'mindgrid.apphive', COUNT = 30, PROOF = 15, start = 0;
-    try { start = +sessionStorage.getItem(KEY) || 0; } catch (e) { /* ignore */ }
-    if (!start) { start = Date.now(); try { sessionStorage.setItem(KEY, String(start)); } catch (e) { /* ignore */ } }
-    if (Date.now() - start >= (COUNT + PROOF) * 1000) return;
-    var pill = document.createElement('div');
-    pill.setAttribute('aria-hidden', 'true');
-    pill.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top, 0px) + 12px);transform:translateX(-50%);' +
-      'z-index:2147483647;pointer-events:none;background:rgba(34,32,52,.92);color:#fff;border:1.5px solid #FFD34D;' +
-      'border-radius:999px;padding:8px 16px;font:600 14px/1.35 system-ui,sans-serif;text-align:center;white-space:pre-line;' +
-      'box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:calc(100vw - 32px)';
-    document.body.appendChild(pill);
-    function two(n) { return (n < 10 ? '0' : '') + n; }
-    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    // 1.6.2: no screenshots in the first LOCK seconds (Android FLAG_SECURE via the MzaSecure plugin).
-    // A screenshot attempt (Android 14+) turns the pill red with the real seconds still to wait.
-    var LOCK = 15, Sec = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.MzaSecure;
-    var locked = false, warnUntil = 0;
-    function secure(on) {
-      if (locked === on) return;
-      locked = on;
-      if (Sec && Sec.setSecure) Sec.setSecure({ on: on }).catch(function () {});
-    }
-    if (Sec && Sec.addListener) Sec.addListener('screenshot', function () {
-      if (Date.now() - start < LOCK * 1000) { warnUntil = Date.now() + 4000; tick(true); }
-    });
-    function tick(once) {
-      var ms = Date.now() - start, gone = Math.floor(ms / 1000);
-      secure(ms < LOCK * 1000);
-      if (gone >= COUNT + PROOF) { pill.remove(); return; }
-      if (gone < COUNT) {
-        var left = COUNT - gone, wait = LOCK - gone;
-        var warn = wait > 0 && Date.now() < warnUntil;
-        pill.style.background = warn ? 'rgba(178,34,34,.95)' : 'rgba(34,32,52,.92)';
-        pill.textContent = warn ? 'Screenshot blocked — wait ' + wait + ' more second' + (wait === 1 ? '' : 's') :
-          'App Hive test: keep open ' + Math.floor(left / 60) + ':' + two(left % 60) +
-          (wait > 0 ? '\nScreenshots allowed in ' + wait + ' s' : '');
-      } else {
-        var d = new Date(start + COUNT * 1000);
-        pill.style.background = 'rgba(30,122,70,.95)';
-        pill.textContent = '\u2713 Test complete \u2014 take a screenshot now\n' + d.getDate() + ' ' + M[d.getMonth()] + ' ' +
-          d.getFullYear() + ', ' + two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds());
-      }
-      if (!once) setTimeout(tick, 1000 - ((Date.now() - start) % 1000) + 20);
-    }
-    tick();
-  };
-  document.addEventListener('DOMContentLoaded', function () {
-    var Cap = window.Capacitor;
-    if (Cap && typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform()) MG.testerCountdown();
   });
 
   /* The web build is retired (the game ships on Google Play), so no service worker is registered. */
