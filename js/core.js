@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var MG = (window.MG = window.MG || {});
-  MG.VERSION = '1.7.0';
+  MG.VERSION = '1.7.1';
   MG.puzzles = {};
   MG.ORDER = ['blocks', 'pipes', 'link', 'crowns', 'lights', 'balance'];
   MG.EMOJI = { blocks: '🟧', pipes: '🟩', link: '🟥', crowns: '🟪', lights: '🟦', balance: '🟨' };
